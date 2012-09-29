@@ -1,0 +1,56 @@
+article#main(style="display:none;")
+  header(style='float:right;')
+    - if (everyauth.loggedIn)
+      .account
+        - console.log('\n\n\n')
+        - console.log(everyauth.facebook.user)
+        - var user= everyauth.facebook.user
+        - var photo= everyauth.facebook ? "http://graph.facebook.com/"+user.id+"/picture?type=small" : ""
+        img(height="30", src="#{photo}")
+        p #{user.name}
+
+
+    #actions
+      ul
+        - if (!everyauth.loggedIn)
+          li.right
+            a.action.registro(href="#") Registro
+            span.toggle-text(style='display:none;') Registro
+        - else
+          li.right.salir
+            a.action.salir(href="/logout") Salir
+            span.toggle-text(style='display:none;') Salir
+
+          li.right.mis-mapas
+            a.action(href="#/mis-mapas") Mis Mapas
+            span.toggle-text(style='display:none;') Mis Mapas
+
+        li.right
+          a.action.search.on(href="#") Buscar
+          span.toggle-text(style='display:none;') Buscar
+
+  section
+    #map
+
+
+article#registro
+
+.login.rslide-card
+  h2 Con&eacute;ctate!
+  .login-buttons
+    #fb-button(style='background-position: left -188px')
+      a.fb_button_medium(href='/auth/facebook')
+        span
+    #gg-button
+      a.gg_button_medium(href='/auth/google', style='border: 0px')
+        span
+
+.rslide-card.node-list.active
+  include includes/node_list
+
+.rslide-card.node-front
+  include includes/node_front
+
+.maplabel.layout(style='hidden')
+  p &nbsp;
+
