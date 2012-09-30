@@ -1,55 +1,57 @@
-article#main(style="display:none;")
+article#main
   header(style='float:right;')
     - if (everyauth.loggedIn)
       .account
-        - console.log('\n\n\n')
-        - console.log(everyauth.facebook.user)
         - var user= everyauth.facebook.user
         - var photo= everyauth.facebook ? "http://graph.facebook.com/"+user.id+"/picture?type=small" : ""
         img(height="30", src="#{photo}")
         p #{user.name}
 
 
-    #actions
+    #top-nav
       ul
         - if (!everyauth.loggedIn)
           li.right
-            a.action.registro(href="#") Registro
+            a.action.login(href="#") Registro
             span.toggle-text(style='display:none;') Registro
         - else
           li.right.salir
-            a.action.salir(href="/logout") Salir
+            a.salir(href="/logout") Salir
             span.toggle-text(style='display:none;') Salir
 
-          li.right.mis-mapas
-            a.action(href="#/mis-mapas") Mis Mapas
+          li.right
+            a.mis-mapas.action.on(href="#/mis-mapas") Mis Mapas
             span.toggle-text(style='display:none;') Mis Mapas
 
         li.right
-          a.action.search.on(href="#") Buscar
+          a.action.search(href="#") Buscar
           span.toggle-text(style='display:none;') Buscar
 
   section
     #map
 
+.bg-rslide-card
 
-article#registro
+-if (!everyauth.loggedIn)
+  .login.rslide-card
+    h2 Con&eacute;ctate!
+    .login-buttons
+      #fb-button(style='background-position: left -188px')
+        a.fb_button_medium(href='/auth/facebook')
+          span
+      #gg-button
+        a.gg_button_medium(href='/auth/google', style='border: 0px')
+          span
 
-.login.rslide-card
-  h2 Con&eacute;ctate!
-  .login-buttons
-    #fb-button(style='background-position: left -188px')
-      a.fb_button_medium(href='/auth/facebook')
-        span
-    #gg-button
-      a.gg_button_medium(href='/auth/google', style='border: 0px')
-        span
+  .rslide-card.search.active
+    include includes/node_list
 
-.rslide-card.node-list.active
-  include includes/node_list
+-if (everyauth.loggedIn)
+  .rslide-card.search
+    include includes/node_list
+  .rslide-card.mis-mapas.active
+    include includes/mymappings
 
-.rslide-card.node-front
-  include includes/node_front
 
 .maplabel.layout(style='hidden')
   p &nbsp;

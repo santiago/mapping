@@ -16,4 +16,13 @@ html
     script(type="text/javascript", src="/javascripts/thirdparty/jquery/jquery-1.7.min.js")
     script(type="text/javascript", src="/javascripts/thirdparty/jquery.jgrowl_minimized.js")
     script(type="text/javascript", src="/javascripts/thirdparty/OpenLayers.js")
-    script(type="text/javascript", src="/javascripts/client.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/underscore.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/backbone.js")
+    script(type="text/javascript", src="/javascripts/Map.js")
+    -if (everyauth.loggedIn)
+      script(type="text/javascript", src="/javascripts/forms.js")
+      script(type="text/javascript", src="/javascripts/app.js")
+    -else
+      script(type="text/javascript", src="/javascripts/front.js")
+      
+

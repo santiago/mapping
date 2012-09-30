@@ -1,1 +1,4 @@
 node_modules
+nohup.out
+.settings
+.c9revisions
