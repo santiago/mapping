@@ -15,6 +15,7 @@
     "socket.io": "0.9.6",
     "mongoose": "2.7.2",
     "everyauth": "0.2.32",
-    "gzippo": "0.1.7"
+    "gzippo": "0.1.7",
+    "dustjs-linkedin": "1.1.0"
   }
 }

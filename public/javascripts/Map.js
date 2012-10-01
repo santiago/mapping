@@ -11,7 +11,6 @@ var TopNav = new (function _TopNav() {
 });
 
 var CardSlider = new (function _CardSlider() {
-
 })();
 
 CardSlider.constructor.prototype.show = function(action) {
@@ -38,23 +37,80 @@ var Mapping = Backbone.Model.extend({
     }
 });
 
-var MappingList = new Backbone.Collection.extend({
+var MappingList = Backbone.Collection.extend({
     model: Mapping,
     url: '/mappings'
 });
 
 var MyMappingsView = Backbone.View.extend({
-    collection: MappingList,
+    el: $('#mis-mapas').get(),
+    
+    events: {
+        "click button#addmap": "openNewMap",
+        "keypress input": "captureKey"
+    },
+
+    initialize: function() {
+        var view = this;
+        this.render();
+        $(window).on('keydown', function(e) {
+            if (e.keyCode == 27) {
+                view.closeNewMap();
+            }
+        });
+        
+        this.collection.on('sync', function(e) {
+            view.render();
+        });
+    },
 
     render: function() {
-        console.log('rendering MyMappingsView ...');
         this.collection.fetch({
-            data: { user_id: this.user_id }
+            data: { user_id: this.user_id },
+            success: function(view, data) {
+                $('ul.mappings').empty();
+                data.forEach(function(item) {
+                    dust.render('mapping_item', item, function(err, html) {
+                        $('ul.mappings').append(html);
+                    })
+                });
+            }
         });
+    },
+    
+    openNewMap: function() {
+        $('#newmap').slideDown('fast');
+        $('.overlay').fadeIn('fast');
+        $('#newmap input').focus();
+    },
+    
+    closeNewMap: function() {
+        $('#newmap').slideUp('fast');
+        $('.overlay').fadeOut('fast');
+    },
+    
+    createMapping: function() {
+        var title = $.trim($('#newmap input').val());
+        if (!title) { return false }
+        this.collection.create({
+            title: title
+        });
+    },
+    
+    captureKey: function(e) {
+        switch(e.keyCode) {
+            case 13:
+                this.createMapping();
+                break;
+            default:
+                break;
+        }
     }
 });
 
-new MyMappingsView();
+new MyMappingsView({
+    collection: new MappingList
+});
 
 var Map = new (function _Map() {
 
@@ -151,53 +207,12 @@ var Map = new (function _Map() {
 
     map.addControl(new OpenLayers.Control.MousePosition());
 })();
-    
-Map.constructor.prototype.showLabels = function() {
-    $.get('/mappings', function(data) {
-        data.forEach(function(node) {
-            self.nodes[node._id] = node;
-
-            var point = new OpenLayers.LonLat(node.longitude, node.latitude);
-            var marker = new OpenLayers.Marker(point, icon.clone());
-            markers.addMarker(marker);
-
-            // Position label
-            var popupPoint = new OpenLayers.LonLat(node.longitude + 10, node.latitude + 40);
-            self.popup(popupPoint, node._id, node.name);
-
-            // Style label
-            var $nodeLabel = $("#" + node._id);
-            $nodeLabel.addClass("maplabel");
-            $nodeLabel.css({
-                border: "2px solid #666"
-            });
-            $nodeLabel.find('#' + node._id + '_close').remove();
-
-            // on mouse over label
-            $nodeLabel.on('mouseover', function(e) {
-                $nodeLabel.addClass('hover');
-                $nodeLabel.css({
-                    border: "2px solid blue"
-                });
-            });
-
-            // on mouse out label
-            $nodeLabel.on('mouseout', function(e) {
-                $nodeLabel.removeClass('hover');
-                $nodeLabel.css({
-                    border: "2px solid #666"
-                });
-            });
-        });
-    });
-};
 
 $(function($) {
     function success(pos) {
         var position = [pos.coords.latitude, pos.coords.longitude];
         var point = new OpenLayers.LonLat(position[1], position[0]).transform(new OpenLayers.Projection("EPSG:4326"), Map.map.getProjectionObject());
         Map.map.setCenter(point, 16);
-        Map.showLabels();
     }
 
     function error() {}

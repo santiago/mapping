@@ -19,9 +19,7 @@ var AppView = Backbone.View.extend({
 
 function init(opts) {
     startUi.call();
-    
-    new MyMappingsView({ user_id: 'santiago' });
-    
+  
     $("#formbox .button.mapme").click(function() {
         var data = RegisterForm.getValidData({
             exclude: ['latitude', 'longitude']

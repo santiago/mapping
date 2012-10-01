@@ -43,7 +43,7 @@ app.configure(function(){
     this.use(this.router);
 });
 
-app.configure('development', function(){
+app.configure('development', function() {
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
 });
 
@@ -59,6 +59,12 @@ app.get('/', function(req, res) {
 		    nodes: []
 	    }
 	});
+});
+
+var templates = require('./templates');
+app.get('/javascripts/compiled_tpls.js', function(req, res) {
+    res.header('Content-Type', 'text/javascript');
+    res.send(templates);
 });
 
 // Start Services
