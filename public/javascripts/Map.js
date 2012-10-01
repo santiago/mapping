@@ -1,3 +1,7 @@
+var app = app || {};
+
+$(function($) {
+
 var TopNav = new (function _TopNav() {
     $('#top-nav a.action').click(function(e) {
         e.preventDefault();
@@ -37,6 +41,16 @@ var Mapping = Backbone.Model.extend({
     }
 });
 
+var MappingRouter = Backbone.Router.extend({
+    routes: {
+        "mapping/:id":  "getMappingById"
+    },
+    getMappingById: function(id) {
+        View.getMappingById(id)
+    }
+});
+new MappingRouter();
+
 var MappingList = Backbone.Collection.extend({
     model: Mapping,
     url: '/mappings'
@@ -47,7 +61,8 @@ var MyMappingsView = Backbone.View.extend({
     
     events: {
         "click button#addmap": "openNewMap",
-        "keypress input": "captureKey"
+        "keypress input": "captureKey",
+        "click #newmap .close": "closeNewMap"
     },
 
     initialize: function() {
@@ -79,13 +94,17 @@ var MyMappingsView = Backbone.View.extend({
     },
     
     openNewMap: function() {
-        $('#newmap').slideDown('fast');
+        $('#newmap').slideDown('fast', function() {
+            // $('#newmap .close').show()
+        });
         $('.overlay').fadeIn('fast');
         $('#newmap input').focus();
     },
     
     closeNewMap: function() {
-        $('#newmap').slideUp('fast');
+        $('#newmap').slideUp('fast', function() {
+            // $('#newmap .close').hide()
+        });
         $('.overlay').fadeOut('fast');
     },
     
@@ -105,10 +124,15 @@ var MyMappingsView = Backbone.View.extend({
             default:
                 break;
         }
+    },
+    
+    getMappingById: function(id) {
+        console.log('getMappingById');
+        console.log(id);
     }
 });
 
-new MyMappingsView({
+var View = new MyMappingsView({
     collection: new MappingList
 });
 
@@ -208,7 +232,6 @@ var Map = new (function _Map() {
     map.addControl(new OpenLayers.Control.MousePosition());
 })();
 
-$(function($) {
     function success(pos) {
         var position = [pos.coords.latitude, pos.coords.longitude];
         var point = new OpenLayers.LonLat(position[1], position[0]).transform(new OpenLayers.Projection("EPSG:4326"), Map.map.getProjectionObject());
@@ -224,4 +247,6 @@ $(function($) {
         alert('Geolocation not supported');
         return;
     }
-});
+    
+    
+}); // init closure
