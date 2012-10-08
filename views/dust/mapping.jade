@@ -1,0 +1,42 @@
+.rslide-card.mapping
+  article.mapping(id='{id}')
+    label Mapa
+    span.edit
+      a(href='#') Editar
+    input(name='title', value='{title}')
+    label Descripci&oacute;n
+    p.description {description}
+    span.edit
+      a(href='#') Editar
+    textarea(name='description', rows='4')
+    label Tags
+    input(name='tags', value='{tags}')
+    header.points
+      label Puntos
+      span
+        button#addpoint.css3button + Agregar punto
+    ul.points(style='position: relative;')
+      section#newpoint(style='display:none;')
+        input(type='hidden', name='lat')
+        input(type='hidden', name='lon')
+        span.close &nbsp;
+        label.title T&iacute;tulo
+        input(type='text', name='title')
+        label Descripci&oacute;n
+        textarea(name='description', rows='2')
+        label Direcci&oacute;n
+        textarea(name='address', rows='2')
+        button#mappoint.css3button.blue-1 Colocar Punto en el Mapa
+        .info.pointing(style='display:none;')
+          p
+            span.one
+              | Ubica el Punto sobre el Mapa y luego Click
+            span.two
+              | Tip: Para moverte por el mapa deja el click presionado y mueve el mouse
+            span.three(style='display:none;')
+              | Tip: Para reubicar el Punto haz click una vez sobre él y muévelo
+        button#savepoint.css3button.blue-1(style='display:none;') Agregar Punto
+      li(style='display:none;')
+        .point-item
+          span.marker-icon
+          a(href='#') Name

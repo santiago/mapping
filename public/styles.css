@@ -2,6 +2,11 @@
   margin: 0;
   padding: 0;
 }
+html,
+body,
+root-wrapper {
+  height: 100%;
+}
 a {
   text-decoration: none;
 }
@@ -34,29 +39,29 @@ body {
   position: absolute;
   left: 50%;
 }
-header {
+header.top {
   background: #000;
   color: #fff;
   position: absolute;
   width: 100%;
   height: 32px;
 }
-header p {
+header.top p {
   padding-top: 6px;
   text-align: right;
   margin-right: 20px;
 }
-header #top-nav {
+header.top #top-nav {
   margin-top: 7px;
   margin-left: 10px;
 }
-header .salir,
-header li {
+header.top .salir,
+header.top li {
   float: left;
   margin-right: 2px;
 }
-header .salir a,
-header li a {
+header.top .salir a,
+header.top li a {
   color: #fff;
   padding: 1px 8px;
   border: 1px solid #fff;
@@ -74,13 +79,13 @@ header li a {
   -webkit-border-bottom-right-radius: 2px;
   border-bottom-right-radius: 2px;
 }
-header .salir a.on,
-header li a.on {
+header.top .salir a.on,
+header.top li a.on {
   color: #000;
   background: #fff;
 }
-header .salir.right,
-header li.right {
+header.top .salir.right,
+header.top li.right {
   float: right;
 }
 .start {
@@ -284,7 +289,8 @@ header li.right {
   text-align: center;
   margin-top: 10px;
 }
-.maplabel {
+.maplabel,
+.pointlabel {
   -moz-border-radius-topleft: 10px;
   -webkit-border-top-left-radius: 10px;
   border-top-left-radius: 10px;
@@ -301,7 +307,8 @@ header li.right {
   border: 2px solid #aaa;
   font-size: 12px;
 }
-.maplabel.hover {
+.maplabel.hover,
+.pointlabel.hover {
   border: 2px solid #123;
   color: #00f;
   cursor: pointer;
@@ -448,6 +455,7 @@ header li.right {
   text-decoration: underline;
 }
 article#mis-mapas {
+  height: 100%;
   padding: 20px;
 }
 article#mis-mapas .overlay {
@@ -459,6 +467,10 @@ article#mis-mapas .overlay {
   position: absolute;
   display: none;
 }
+article#mis-mapas ul.mappings {
+  overflow: auto;
+  height: 86%;
+}
 article#mis-mapas h2 {
   border-bottom: 1px solid;
 }
@@ -467,6 +479,7 @@ article#mis-mapas button#addmap {
   font-size: 11px;
   font-weight: 900;
   float: left;
+  cursor: pointer;
   margin-top: -23px;
   margin-left: 315px;
 }
@@ -476,6 +489,7 @@ article#mis-mapas section#newmap {
   padding: 10px 10px 20px 10px;
   background-color: #eee;
   position: absolute;
+  z-index: 10;
   width: 86.2%;
   box-shadow: 0px 0px 5px #666;
   -moz-border-radius-topleft: 0;
@@ -518,4 +532,150 @@ article#mis-mapas .mapping-item span.icon {
   width: 48px;
   float: left;
   height: 48px;
+}
+.rslide-card.mapping button#addpoint {
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 900;
+  float: left;
+  cursor: pointer;
+  width: 110px;
+  margin: 0;
+}
+.rslide-card.mapping header.points {
+  margin-top: 5px;
+  border-bottom: 1px solid #666;
+  float: left;
+  width: 100%;
+}
+.rslide-card.mapping header.points label {
+  width: 30%;
+  margin-top: 6px;
+}
+.rslide-card.mapping header.points span {
+  float: right;
+  padding: 0;
+}
+.rslide-card.mapping span.marker-icon {
+  background: url("/images/Map-Marker-Marker-Inside-Azure-32.png") no-repeat 0 0;
+  width: 32px;
+  height: 32px;
+  float: left;
+}
+.rslide-card.mapping section#newpoint {
+  font-size: 12px;
+  border: 1px solid #aaa;
+  padding: 10px 10px 20px 10px;
+  background-color: #eee;
+  position: absolute;
+  z-index: 10;
+  width: 86.2%;
+  box-shadow: 0px 0px 5px #666;
+  -moz-border-radius-topleft: 0;
+  -webkit-border-top-left-radius: 0;
+  border-top-left-radius: 0;
+  -moz-border-radius-topright: 0;
+  -webkit-border-top-right-radius: 0;
+  border-top-right-radius: 0;
+  -moz-border-radius-bottomleft: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  -moz-border-radius-bottomright: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  width: 94.7%;
+}
+.rslide-card.mapping section#newpoint span.close {
+  opacity: 0.2;
+  cursor: pointer;
+  float: right;
+  margin-top: 0px;
+  width: 16px;
+  height: 16px;
+  background: url("/images/close-16.png") no-repeat 0 0;
+}
+.rslide-card.mapping section#newpoint p {
+  font-weight: 900;
+  margin-bottom: 5px;
+}
+.rslide-card.mapping section#newpoint input {
+  font-size: 16px;
+  width: 99%;
+  padding: 3px 0;
+}
+.rslide-card.mapping section#newpoint button#mappoint,
+.rslide-card.mapping section#newpoint button#savepoint {
+  float: right;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 10px;
+}
+.rslide-card.mapping section#newpoint label.title {
+  margin-top: 8px;
+}
+.rslide-card.mapping section#newpoint .info.pointing {
+  display: none;
+  float: left;
+  width: 100%;
+}
+.rslide-card.mapping section#newpoint .info.pointing span {
+  float: left;
+  width: 100%;
+}
+.rslide-card.mapping section#newpoint .error {
+  float: left;
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  color: #f00;
+  margin-top: 7px;
+  margin-left: 5px;
+}
+.rslide-card.mapping ul.points {
+  width: 100%;
+}
+.rslide-card.mapping ul.points .point-item {
+  float: left;
+  width: 100%;
+  padding: 5px 0;
+}
+.rslide-card.mapping ul.points .point-item a {
+  color: #000;
+  font-size: 14px;
+  font-weight: 900;
+}
+.rslide-card.mapping article.mapping {
+  padding: 20px;
+}
+.rslide-card.mapping h2,
+.rslide-card.mapping input,
+.rslide-card.mapping textarea {
+  margin-bottom: 5px;
+}
+.rslide-card.mapping h2,
+.rslide-card.mapping label,
+.rslide-card.mapping input,
+.rslide-card.mapping ul.points,
+.rslide-card.mapping textarea {
+  clear: left;
+  float: left;
+}
+.rslide-card.mapping input[name=title] {
+  width: 100%;
+  font-size: 22px;
+}
+.rslide-card.mapping label {
+  font-size: 12px;
+  font-weight: bold;
+}
+.rslide-card.mapping span.edit {
+  width: 30%;
+  float: right;
+  font-size: 12px;
+  text-align: right;
+}
+.rslide-card.mapping input,
+.rslide-card.mapping textarea {
+  width: 100%;
 }

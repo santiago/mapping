@@ -37,6 +37,9 @@ corner-right(px)
   margin: 0
   padding: 0
 
+html, body, root-wrapper
+  height: 100%
+
 a
   text-decoration: none
 
@@ -71,7 +74,7 @@ body
   position: absolute
   left: 50%
 
-header
+header.top
   background: black
   color: white
   position: absolute
@@ -251,7 +254,7 @@ header
   text-align: center
   margin-top: 10px
 
-.maplabel
+.maplabel, .pointlabel
   corner(10px)
   background: white
   border: 2px solid #AAA
@@ -356,7 +359,44 @@ header
           &:hover
             text-decoration: underline
 
+button()
+  padding: 1px 7px
+  font-size: 11px
+  font-weight: 900
+  float: left
+  cursor: pointer
+
+dropdown-popup()
+  span.close
+    opacity: 0.2
+    cursor: pointer
+    float: right
+    margin-top: 0px
+    width: 16px
+    height: 16px
+    background: url(/images/close-16.png) no-repeat 0 0
+  p
+    font-weight: 900
+    margin-bottom: 5px
+  font-size: 12px
+  border: 1px solid #AAA
+  padding: 10px 10px 20px 10px
+  background-color: #EEE
+  position: absolute
+  z-index: 10
+  width: 86.2%
+  box-shadow: 0px 0px 5px #666
+  corner-bottom(4px)
+  input
+    font-size: 16px
+    width: 99%
+    padding: 3px 0
+
 article#mis-mapas
+  height: 100%
+  
+  padding: 20px
+
   .overlay
     background: white
     opacity: 0.5
@@ -365,41 +405,21 @@ article#mis-mapas
     height: 100%
     position: absolute
     display: none
-  padding: 20px
+
+  ul.mappings
+    overflow: auto
+    height: 86%
+  
   h2
     border-bottom: 1px solid
+  
   button#addmap
-    padding: 1px 7px
-    font-size: 11px
-    font-weight: 900
-    float: left
+    button()
     margin-top: -23px
     margin-left: 315px
 
   section#newmap
-    span.close
-      opacity: 0.2
-      cursor: pointer
-      float: right
-      margin-top: 0px
-      width: 16px
-      height: 16px
-      background: url(/images/close-16.png) no-repeat 0 0
-    p
-      font-weight: 900
-      margin-bottom: 5px
-    font-size: 12px
-    border: 1px solid #AAA
-    padding: 10px 10px 20px 10px
-    background-color: #EEE
-    position: absolute
-    width: 86.2%
-    box-shadow: 0px 0px 5px #666
-    corner-bottom(4px)
-    input
-      font-size: 16px
-      width: 99%
-      padding: 3px 0
+    dropdown-popup()
 
   .mapping-item
     float: left
@@ -409,3 +429,88 @@ article#mis-mapas
       width: 48px
       float: left
       height: 48px
+
+.rslide-card.mapping
+  button#addpoint
+    button()
+    width: 110px
+    margin: 0
+
+  header.points
+    margin-top: 5px
+    border-bottom: 1px solid #666
+    float: left
+    width: 100%
+    label
+      width: 30%
+      margin-top: 6px
+    span
+      float: right
+      padding: 0
+
+  span.marker-icon
+    background: url(/images/Map-Marker-Marker-Inside-Azure-32.png) no-repeat 0 0
+    width: 32px
+    height: 32px
+    float: left
+
+  section#newpoint
+    dropdown-popup()
+    width: 94.7%
+    button#mappoint, button#savepoint
+      float: right
+      margin-top: 10px
+      font-size: 16px
+      cursor: pointer
+      padding: 10px 10px
+    label.title
+      margin-top: 8px
+    .info.pointing
+      display: none
+      float: left
+      width: 100%
+      span
+        float: left
+        width: 100%
+    .error
+      float: left
+      margin: 0
+      padding: 0
+      font-size: 11px
+      color: red
+      margin-top: 7px
+      margin-left: 5px
+
+
+  ul.points
+    width: 100%
+
+    .point-item
+      float: left
+      width: 100%
+      padding: 5px 0
+      a
+        color: black
+        font-size: 14px
+        font-weight: 900
+
+  article.mapping
+    padding: 20px
+  h2, input, textarea
+    margin-bottom: 5px
+  h2, label, input, ul.points, textarea
+    clear: left
+    float: left
+  input[name=title]
+    width: 100%
+    font-size: 22px
+  label
+    font-size: 12px
+    font-weight: bold
+  span.edit
+    width: 30%
+    float: right
+    font-size: 12px
+    text-align: right
+  input, textarea
+    width: 100%

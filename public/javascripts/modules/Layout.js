@@ -16,8 +16,8 @@ define(function() {
 
     var CardSlider = new(function _CardSlider() {})();
 
-    CardSlider.constructor.prototype.show = function(action) {
-        if ($('.rslide-card.active').hasClass(action)) {
+    CardSlider.constructor.prototype.show = function(card) {
+        if ($('.rslide-card.active').hasClass(card)) {
             return false;
         }
 
@@ -27,7 +27,7 @@ define(function() {
             if ($(this).hasClass('bg-rslide-card')) {
                 return false;
             }
-            $('.bg-rslide-card, .rslide-card.' + action).animate({
+            $('.bg-rslide-card, .rslide-card.' + card).animate({
                 'right': '0'
             }).addClass('active');
         }).removeClass('active');

@@ -20,6 +20,9 @@ requirejs(['Layout', 'Mapping'], function(_Layout, _Mapping) {
         }
     }));
 
+    app.TopNav = TopNav;
+    app.CardSlider = CardSlider;
+
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "start",

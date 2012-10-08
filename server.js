@@ -52,8 +52,6 @@ app.configure('production', function(){
 });
 
 app.get('/', function(req, res) {
-    console.log('\n\n\n');
-    console.log(req.session);
 	res.render('index', {
 	    locals: {
 		    nodes: []

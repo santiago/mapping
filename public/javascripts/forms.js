@@ -1,111 +1,93 @@
-var FormValidator = function(fields) {
-        this.fields = fields;
-        this.valid = false;
-    };
-
-FormValidator.prototype.populate = function(obj) {
-    var url;
-    for (var f in this.fields) {
-        var url = f == 'url' ? "http://" + obj[f] : undefined;
-        url = f == 'twitter' ? "http://twitter.com/" + obj[f] : url;
-        url = f == 'facebook' ? "http://facebook.com/" + obj[f] : url;
-
-        switch (f) {
-        case 'name':
-            $("#node-front").find("h2").text(obj[f]);
-            break;
-        case 'description':
-            $("#node-front").find(".element." + f + " p").text(obj[f]);
-            break;
-        case 'url':
-        case 'facebook':
-        case 'twitter':
-            $("#node-front").find(".element." + f + " a").text(obj[f]).attr('href', url)
-            break;
-        }
-    }
+var FormValidator = function($ctx, fields) {
+	this.fields = fields;
+	this.valid = false;
+	this.$ctx = $ctx;
 };
 
-FormValidator.prototype.validate = function(opts) {
-    var exclude = opts.exclude || [];
-    var validators = {
-        'presence': function(val) {
-            if (val == '' || !val) {
-                return false
-            }
-            return true
-        }
-    };
+FormValidator.prototype.setElement = function($el) {
+    this.$ctx = $el;
+}
 
-    $("#formbox").find(".error").remove();
-    var fields = this.fields;
-    for (var f in fields) {
-        var val = $("#formbox").find(fields[f].find).val();
-        if (fields[f].validate && fields[f].validate.length) {
-            for (var i in fields[f].validate) {
-                if (exclude.indexOf(f) > -1) {
-                    break;
-                }
-                var test = fields[f].validate[i];
-                if (!validators[test](val)) {
-                    $("#formbox").find(fields[f].find).before("<p class='error'>* campo obligatorio</p>");
-                    return false;
-                }
-            }
-        }
-        fields[f].data = val;
-    }
-    return true;
+FormValidator.prototype.validate = function(opts) {
+	var self = this;
+	var exclude = opts.exclude || [];
+	var validators = {
+		'presence': function(val) {
+			if (val == '' || !val) {
+				return false
+			}
+			return true
+		},
+		'email': function(val) {
+			var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+			if (val.match(re)) {
+				return true
+			}
+			return false
+		},
+		'fecha': function(val) {
+			var re = /\d{4}\/(\d{2})\/(\d{2})/;
+			if (val.match(re)) {
+				return true
+			}
+			return false
+		}
+	};
+
+	this.$ctx.find(".error").remove();
+	var fields = this.fields;
+	for (var f in fields) {
+		var val = (function() {
+			if (typeof fields[f].val == 'function') return fields[f].val();
+			else return self.$ctx.find(fields[f].find).val() || '';
+		})();
+
+		if (fields[f].validate && fields[f].validate.length) {
+			for (var i in fields[f].validate) {
+				if (exclude.indexOf(f) > -1) {
+					break;
+				}
+
+				var test = fields[f].validate[i];
+				if (!validators[test](val)) {
+					var lookup = $.trim(fields[f].find.replace(/option:selected|:checked/, ''));
+					this.$ctx.find(lookup).first().before("<p class='error'>* campo obligatorio</p>");
+					return false;
+				}
+			}
+		}
+		fields[f].data = val;
+	}
+	return true;
 }
 
 FormValidator.prototype.getValidData = function(opts) {
-    var data;
-    opts = opts || {};
-    if (this.validate(opts)) {
-        data = {};
-        for (var f in this.fields) {
-            data[f] = this.fields[f].data;
-        }
-    }
-    return data;
+	var data;
+	opts = opts || {};
+	if (this.validate(opts)) {
+		data = {};
+		for (var f in this.fields) {
+			data[f] = this.fields[f].data;
+		}
+	}
+	return data;
 };
 
-var RegisterForm = new FormValidator({
-    'name': {
-        'find': 'input[name=name]',
-        'validate': ['presence']
+var PointForm = new FormValidator($("#newpoint"), {
+    'title': {
+		'find': 'input[name=title]',
+		'validate': ['presence']
+	},
+	'description': {
+		'find': 'textarea[name=description]'
+	},
+    'address': {
+        'find': 'textarea[name=address]'
     },
-    'email': {
-        'find': 'input[name=email]',
-        'validate': ['presence']
+    'lat': {
+        'find': 'input[name=lat]'
     },
-    'description': {
-        'find': 'textarea[name=descripcion]',
-        'validate': ['presence']
-    },
-    'url': {
-        'find': 'input[name=url]',
-        'validate': ['presence']
-    },
-    'latitude': {
-        'find': 'input[name=latitude]',
-        'validate': ['presence']
-    },
-    'longitude': {
-        'find': 'input[name=longitude]',
-        'validate': ['presence']
-    },
-    'twitter': {
-        'find': 'input[name=twitter]',
-    },
-    'facebook': {
-        'find': 'input[name=fb]',
-    },
-    'tags': {
-        'find': 'input[name=tags]',
-        'validate': ['presence']
-    },
-    'members': {
-        'find': 'input[name=miembros]'
+    'lon': {
+        'find': 'input[name=lon]'
     }
 });
