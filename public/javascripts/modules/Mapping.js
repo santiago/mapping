@@ -7,7 +7,8 @@ return function(app) {
      *
      */
     var Mapping = Backbone.Model.extend({
-        idAttribute: '_id'
+        idAttribute: '_id',
+        urlRoot: '/mappings'
     });
 
     /*  @Model Point
@@ -114,26 +115,18 @@ return function(app) {
 
         getMappingById: function(id) {
             var self = this;
-            var mapping = this.collection.get(id);
-
-            if(!mapping) {
-                this.collection.fetch({
-                    data: {
-                        _id: id
-                    }, 
-                    success: function(view, data) {
-                        mapping = view.at(0);
-                        success();
-                    }
-                });
-            } else {
-                mapping.fetch();
-            }
+            var mapping = this.collection.get(id) || new Mapping({ _id: id });
+            mapping.fetch({
+                success: function(view, data) {
+                    // mapping = view;
+                    success();
+                }
+            });
 
             function success() {
                 app.setMappingName(mapping.get('title'));
                 if(self.current_mapping && self.current_mapping.id != mapping.id) {
-                    // self.current_mapping.remove();
+                    // self.current_mapping.remove(); // This should work but doesn't
                     $(self.current_mapping.el).remove();
                 }
                 
@@ -204,7 +197,6 @@ return function(app) {
         },
         
         renderPointLabel: function(data) {
-            console.log(data);
             var point = new OpenLayers.LonLat(data.loc[1], data.loc[0]);
             point.transform(
                 new OpenLayers.Projection("EPSG:4326"),
@@ -470,7 +462,9 @@ return function(app) {
             View.getMappingById(id)
         },
         getMyMappings: function() {
-            View.render();
+            //console.log('oe');
+            //View.render();
+            app.CardSlider.show('mis-mapas');
         }
     });
     new MappingRouter();

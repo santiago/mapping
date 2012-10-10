@@ -3,7 +3,7 @@
  */
 define(function() {
     var TopNav = new(function _TopNav() {
-        $('#top-nav a.action').click(function(e) {
+        /*$('#top-nav a.action').click(function(e) {
             e.preventDefault();
             $(this).blur();
             var action = $(this).attr('class').replace(/action|on/g, '');
@@ -11,7 +11,7 @@ define(function() {
             CardSlider.show(action);
             $('#top-nav a.action.on').removeClass('on');
             $(this).addClass('on');
-        });
+        });*/
     });
 
     var CardSlider = new(function _CardSlider() {})();

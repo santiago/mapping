@@ -13,19 +13,19 @@ article#main
       ul
         - if (!everyauth.loggedIn)
           li.right
-            a.action.login(href="#") Registro
-            span.toggle-text(style='display:none;') Registro
+            a.action.login(href="#login") Entrar
+            span.toggle-text(style='display:none;') Entrar
         - else
           li.right.salir
             a.salir(href="/logout") Salir
             span.toggle-text(style='display:none;') Salir
 
           li.right
-            a.mis-mapas.action.on(href="#/mis-mapas") Mis Mapas
+            a.mis-mapas.action.on(href="#mappings") Mis Mapas
             span.toggle-text(style='display:none;') Mis Mapas
 
         li.right
-          a.action.search(href="#") Buscar
+          a.action.search(href="#search") Buscar
           span.toggle-text(style='display:none;') Buscar
 
   section
@@ -34,7 +34,7 @@ article#main
 .bg-rslide-card
 
 -if (!everyauth.loggedIn)
-  .login.rslide-card
+  .rslide-card.login
     h2 Con&eacute;ctate!
     .login-buttons
       #fb-button(style='background-position: left -188px')

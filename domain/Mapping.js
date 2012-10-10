@@ -41,17 +41,11 @@ var Service = function(app) {
     
     app.post('/mappings/:mapping_id/points', this.beforePost, function(req, res) {
         MappingStore.findById(req.params.mapping_id, function(err, mapping) {
-            /*console.log('post');
-            console.log(err);
-            console.log(mapping);*/
             req.body.loc = [parseFloat(req.body.lat), parseFloat(req.body.lon)];
             delete req.body['lat'];
             delete req.body['lon'];
-            console.log(req.body);
             mapping.points.push(req.body);
-            console.log(mapping.points);
             mapping.save(function(err, ok) {
-                console.log(ok);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    console.log(err);
                 res.send({ ok: true });
             });
         });

@@ -23,13 +23,27 @@ requirejs(['Layout', 'Mapping'], function(_Layout, _Mapping) {
     app.TopNav = TopNav;
     app.CardSlider = CardSlider;
 
+    var loggedIn = $('.account').length;
+
     var AppRouter = Backbone.Router.extend({
         routes: {
             "": "start",
-            "_=_": "start"
+            "_=_": "start",
+            "login": "showLogin",
+            "search": "showSearch"
         },
+        
         start: function(id) {
-            window.location.href = '#mappings';
+            if (loggedIn) app.CardSlider.show('mis-mapas')
+            else app.CardSlider.show('search')
+        },
+        
+        showLogin: function() {
+            app.CardSlider.show('login');
+        },
+        
+        showSearch: function() {
+            app.CardSlider.show('search');
         }
     });
     new AppRouter();
