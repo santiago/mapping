@@ -91,6 +91,7 @@ return function(app) {
             });
             $('.overlay').fadeIn('fast');
             $('#newmap input').focus();
+            $('button#addmap').fadeOut('fast');
         },
 
         closeNewMap: function() {
@@ -98,6 +99,7 @@ return function(app) {
                 // $('#newmap .close').hide()
             });
             $('.overlay').fadeOut('fast');
+            $('button#addmap').fadeIn('fast');
         },
 
         createMapping: function() {
@@ -226,11 +228,13 @@ return function(app) {
          */
         openNewPoint: function() {
             $('#newpoint').slideDown();
+            $('button#addpoint').fadeOut('fast');
         },
         
         closeNewPoint: function() {
             $('#newpoint').slideUp(go.bind(this));
             $('#newpoint').find('input, textarea').val('');
+            $('button#addpoint').fadeIn('fast');
             function go() {
                 this.$el.find('#newpoint .info.pointing').find('.one, .two').show();
                 this.$el.find('#newpoint #mappoint').show();
