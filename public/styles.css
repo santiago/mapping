@@ -483,6 +483,13 @@ article#mis-mapas button#addmap {
   margin-top: -23px;
   margin-left: 315px;
 }
+article#mis-mapas button#savemap {
+  font-size: 12px;
+  padding: 8px;
+  float: right;
+  margin-top: 10px;
+  cursor: pointer;
+}
 article#mis-mapas section#newmap {
   font-size: 12px;
   border: 1px solid #aaa;

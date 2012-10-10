@@ -3,7 +3,7 @@ requirejs.config({
 });
 
 // Start the main app logic.
-requirejs(['Layout', 'Mapping'], function(_Layout, _Mapping) {
+requirejs(['Layout', 'Map', 'Mapping'], function(_Layout, _Map, _Mapping) {
     var TopNav = _Layout.TopNav;
     var CardSlider = _Layout.CardSlider;
 
@@ -22,6 +22,7 @@ requirejs(['Layout', 'Mapping'], function(_Layout, _Mapping) {
 
     app.TopNav = TopNav;
     app.CardSlider = CardSlider;
+    app.Map = _Map;
 
     var loggedIn = $('.account').length;
 

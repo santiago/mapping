@@ -1,8 +1,12 @@
-/*  @module Mapping
+/*
+ *  @module Mapping
  *  @exports function
+ *
  */
 define(function() {
 return function(app) {
+    var Map = app.Map;
+    
     /*  @Model Mapping
      *
      */
@@ -44,7 +48,8 @@ return function(app) {
         events: {
             "click button#addmap": "openNewMap",
             "keypress input": "captureKey",
-            "click #newmap .close": "closeNewMap"
+            "click #newmap .close": "closeNewMap",
+            "click button#savemap": "createMapping"
         },
 
         initialize: function() {
@@ -56,8 +61,10 @@ return function(app) {
                 }
             });
 
-            this.collection.on('sync', function(e) {
+            this.collection.on('sync', function(e, f) {
                 view.render();
+                view.closeNewMap();
+                location.hash = "#mapping/"+e.id;
             });
         },
 
@@ -118,7 +125,6 @@ return function(app) {
             var mapping = this.collection.get(id) || new Mapping({ _id: id });
             mapping.fetch({
                 success: function(view, data) {
-                    // mapping = view;
                     success();
                 }
             });
@@ -180,12 +186,8 @@ return function(app) {
             // Clear current state
             this.$el.find('ul.points li').remove();
             Map.clearPoints();
-            
-            /*Map.markers.markers.forEach(function(marker) {
-                console.log(marker);
-                Map.markers.removeMarker(marker);
-            });*/
 
+            // Render Points
             mapping.points.forEach(function(point) {
                 view.renderPointLabel(point);
                 dust.render('point_item', point, function(err, html) {
@@ -328,129 +330,6 @@ return function(app) {
             this.stopPointing();
         }
     });
-
-    /*  @Singleton
-     *  @UI Map
-     *  Encapsulates all operations upon the (OpenLayers) Map itself
-     */
-    var Map = new(function _Map() {
-
-        this.nodes = {};
-
-        this.map = new OpenLayers.Map('map');
-        
-        var self = this;
-        var map = this.map;
-
-        var lastMouseDown = [];
-
-        // The marker icon
-        var size = new OpenLayers.Size(15, 24);
-        var offset = new OpenLayers.Pixel(-(size.w / 2), -size.h);
-        this.markerIcon = new OpenLayers.Icon('/images/marker-3.png', size, offset);
-
-        $("#map").on('mousedown', function(e) {
-            var point = map.getLonLatFromViewPortPx({
-                x: e.offsetX,
-                y: e.offsetY
-            });
-
-            point.transform(
-                map.getProjectionObject(), 
-                new OpenLayers.Projection("EPSG:4326")
-            );
-
-            lastMouseDown = [point.lat, point.lon];
-        });
-
-        // Remove the annoying Google copyright popup
-        $("#map").on('mouseup', function(e) {
-            $(".olLayerGooglePoweredBy.olLayerGoogleV3").hide();
-        });
-
-        map.events.register('move', this, function(e) {
-            this._moved = true;
-        });
-
-        map.__mousemove = function(e) {
-            var point = map.getLonLatFromViewPortPx(e.xy);
-            var marker = this.getMarker(point);
-            this.markers.addMarker(marker);
-        };
-    
-        map.events.register('click', this, function(e) {
-            if (this._marking) {
-                map.events.unregister('mousemove', this, map.__mousemove);
-                // var newPointMarker = new OpenLayers.Marker(point, icon.clone());
-                // markers.addMarker(newPointMarker);
-                // this._newPointMarker = newPointMarker;
-                this._marking = false;
-                this._moved = false;
-            }
-        });
-
-        map.addControl(new OpenLayers.Control.LayerSwitcher());
-
-        this._marking = false;
-
-        this.markers = new OpenLayers.Layer.Markers("Markers");
-        map.addLayer(this.markers);
-
-        var gphy = new OpenLayers.Layer.Google("Google Physical", {
-            type: google.maps.MapTypeId.TERRAIN
-        });
-
-        var gmap = new OpenLayers.Layer.Google("Google Streets", // the default
-        {
-            numZoomLevels: 20
-        });
-
-        var ghyb = new OpenLayers.Layer.Google("Google Hybrid", {
-            type: google.maps.MapTypeId.HYBRID,
-            numZoomLevels: 20
-        });
-
-        var gsat = new OpenLayers.Layer.Google("Google Satellite", {
-            type: google.maps.MapTypeId.SATELLITE,
-            numZoomLevels: 22
-        });
-
-        var osm = new OpenLayers.Layer.OSM();
-
-        map.addLayers([osm, gmap, gphy, ghyb, gsat]);
-
-        // Google.v3 uses EPSG:900913 as projection, so we have to
-        // transform our coordinates
-        map.setCenter(new OpenLayers.LonLat(10.2, 48.9).transform(
-            new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), 5);
-
-        map.addControl(new OpenLayers.Control.MousePosition());
-    })();
-    
-    Map.constructor.prototype.startPointing = function() {
-        this._marking = true;
-        this.map.events.register('mousemove', this, this.map.__mousemove);
-    };
-    
-    Map.constructor.prototype.stopPointing = function() {
-    };
-    
-    Map.constructor.prototype.getMarker = function(point) {
-        var marker = new OpenLayers.Marker(point, this.markerIcon);
-        return marker;
-    };
-    
-    Map.constructor.prototype.addMarker = function(point) {
-        var marker = new OpenLayers.Marker(point, this.markerIcon.clone());
-        this.markers.addMarker(marker);
-    };
-    
-    Map.constructor.prototype.clearPoints = function(point) {
-        this.markers.destroy();
-        this.markers = new OpenLayers.Layer.Markers("Markers");
-        this.map.addLayer(this.markers);
-        $('.pointlabel').remove();
-    };
     
     // Backbone Router for Mappings
     var MappingRouter = Backbone.Router.extend({
@@ -462,8 +341,6 @@ return function(app) {
             View.getMappingById(id)
         },
         getMyMappings: function() {
-            //console.log('oe');
-            //View.render();
             app.CardSlider.show('mis-mapas');
         }
     });
