@@ -1,5 +1,6 @@
 requirejs.config({
-    baseUrl: 'javascripts/modules'
+    baseUrl: 'javascripts/modules',
+    urlArgs: "bust=" + (new Date()).getTime()
 });
 
 // Start the main app logic.

@@ -16,6 +16,7 @@
     "mongoose": "2.7.2",
     "everyauth": "0.2.32",
     "gzippo": "0.1.7",
-    "dustjs-linkedin": "1.1.0"
+    "dustjs-linkedin": "1.1.0",
+    "awssum": "0.11.0"
   }
 }

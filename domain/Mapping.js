@@ -39,6 +39,18 @@ var Service = function(app) {
     
     ServiceBase.call(this, app, null);
     
+    app.post('/mappings/:mapping_id/points/:point_id/image', this.beforePost, function(req, res) {
+        MappingStore.findById(req.params.mapping_id, function(err, mapping) {
+            req.body.loc = [parseFloat(req.body.lat), parseFloat(req.body.lon)];
+            delete req.body['lat'];
+            delete req.body['lon'];
+            mapping.points.push(req.body);
+            mapping.save(function(err, ok) {
+                res.send({ ok: true });
+            });
+        });
+    });
+    
     app.post('/mappings/:mapping_id/points', this.beforePost, function(req, res) {
         MappingStore.findById(req.params.mapping_id, function(err, mapping) {
             req.body.loc = [parseFloat(req.body.lat), parseFloat(req.body.lon)];

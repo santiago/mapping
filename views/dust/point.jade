@@ -1,0 +1,28 @@
+.rslide-card.point
+  article.point(id='{id}')
+    label Punto
+    span.edit
+      a(href='#') Editar
+    input(name='title', value='{title}')
+    label Descripci&oacute;n
+    p.description {description}
+    span.edit
+      a(href='#') Editar
+    textarea(name='description', rows='4')
+    - // label Tags
+    - // input(name='tags', value='{tags}')
+    label Direcci&oacute;n
+    input(name='address', value='{address}')
+    header.photos
+      label Fotos
+      span
+        button#addphoto.css3button + Agregar foto
+        input#upload(type="file", multiple="multiple")
+    ul.photos(style='position: relative;')
+      
+      
+      button#savephoto.css3button.blue-1 Guardar Foto
+      li(style='display:none;')
+        .point-item
+          span.marker-icon
+          a(href='#') Foto

@@ -121,30 +121,6 @@ return function(app) {
                 break;
             }
         },
-
-        getMappingById: function(id) {
-            var self = this;
-            var mapping = this.collection.get(id) || new Mapping({ _id: id });
-            mapping.fetch({
-                success: function(view, data) {
-                    success();
-                }
-            });
-
-            function success() {
-                app.setMappingName(mapping.get('title'));
-                if(self.current_mapping && self.current_mapping.id != mapping.id) {
-                    // self.current_mapping.remove(); // This should work but doesn't
-                    $(self.current_mapping.el).remove();
-                }
-                
-                self.current_mapping = new MappingView({
-                    id: mapping.id,
-                    model: mapping,
-                    points: new PointList
-                });
-            }
-        }
     });
 
     var View = new MyMappingsView({
@@ -154,18 +130,15 @@ return function(app) {
     /*  @View MappingView
      *
      */
-    var MappingView = Backbone.View.extend({        
+    var MappingView = new (Backbone.View.extend({        
         initialize: function() {
             var view = this;
             
-            this.render();
-            this.points = this.options.points;
-            this.points.url = '/mappings/'+this.id+'/points'
-            
+            this.points = new PointList;
             this.points.on('sync', function(e) {
-                view.closeNewPoint();
-                view.refresh();
-            });
+                this.closeNewPoint();
+                this.refresh();
+            }.bind(this));
         },
 
         events: {
@@ -175,16 +148,45 @@ return function(app) {
             "click #newpoint #savepoint": "savePoint"
         },
         
+        setMapping: function(model, data) {
+            this.id = model.id;
+            this.model = model;
+            this.points.url = '/mappings/'+this.id+'/points';
+        },
+        
+        getMappingById: function(id, callback) {
+            var view = this;
+            var mapping = new Mapping({ _id: id });
+            mapping.fetch({
+                success: function(model, data) {
+                    view.setMapping(model, data)
+                    callback(model);
+                }
+            });
+        },
+        
+        load: function(id) {       
+            this.getMappingById(id, function() {
+                this.render();
+                app.CardSlider.show('mapping');
+            }.bind(this))
+        },
+        
         render: function() {
             var view = this;
             
+            this.__lastPoint = null;
+            this._newPointMarker = null;
+
+            app.setMappingName(this.model.get('title'));
+
             var mapping = this.model.toJSON();
+            $('.rslide-card.mapping').remove();
             dust.render('mapping', mapping, function(err, html) {
                 $('.rslide-card:last').after(html);
                 view.setElement($('.rslide-card.mapping').get());
-                app.CardSlider.show('mapping');
             });
-            
+
             // Clear current state
             this.$el.find('ul.points li').remove();
             Map.clearPoints();
@@ -260,7 +262,7 @@ return function(app) {
             Map.map.events.unregister('click', this, this.__onClickMap);
             this._newPointMarker.events.register('click', this, this.__onClickNewPointMarker);
         },
-        
+
         savePoint: function() {
             PointForm.setElement(this.$el.find('#newpoint'));
             var data = PointForm.getValidData();
@@ -333,19 +335,72 @@ return function(app) {
 
             this.stopPointing();
         }
-    });
+    }));
+    
+    var PointView = new (Backbone.View.extend({
+        events: {
+            'click #addphoto': 'addPhoto',
+            'click #savephoto': 'savePhoto'
+        },
+
+        initialize: function() {
+        },
+        
+        getPointById: function(mapping_id, point_id, callback) {
+            var view = this;
+            MappingView.getMappingById(mapping_id, function(mapping) {
+                view.point = _.find(mapping.get('points'), function(p) {
+                    return p._id == point_id
+                });
+                view.render(callback);
+            });
+        },
+        
+        render: function(callback) {
+            var view = this;
+
+            dust.render('point', this.point, function(err, html) {
+                $('.rslide-card.point').remove();
+                $('.rslide-card:last').after(html);
+                view.setElement($('.rslide-card.point').get());
+                callback();
+                
+                // Hide file input
+                var wrapper = $('<div/>').css({height:0,width:0,'overflow':'hidden'});
+                var fileInput = $(':file').wrap(wrapper);
+                fileInput.change(function(){
+                    var $this = $(this);
+                    $('#file').text($this.val());
+                });
+
+            });
+        },
+        
+        addPhoto: function() {
+            $(':file').click();
+        },
+        
+        savePhoto: function() {
+        }
+    }));
     
     // Backbone Router for Mappings
     var MappingRouter = Backbone.Router.extend({
         routes: {
             "mapping/:id": "getMappingById",
+            "mappings/:mapping_id/points/:point_id": "getPointById",
             "mappings": "getMyMappings"
         },
         getMappingById: function(id) {
-            View.getMappingById(id)
+            MappingView.load(id);
         },
         getMyMappings: function() {
             app.CardSlider.show('mis-mapas');
+        },
+        getPointById: function(mapping_id, point_id) {
+            PointView.getPointById(mapping_id, point_id, function() {
+                app.CardSlider.show('point');
+            })
         }
     });
     new MappingRouter();
@@ -359,7 +414,6 @@ return function(app) {
     }
 
     function error() {}
-
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(success, error);

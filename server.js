@@ -36,8 +36,8 @@ app.configure(function(){
 	    , compile: compile
     }));
     this.use(express.favicon(__dirname + '/public/favicon.ico', { maxAge: 2592000000}));
-    // this.use(express.static(__dirname + '/public'));
-    this.use(gzippo.staticGzip(__dirname + '/public'));    
+    this.use(express.static(__dirname + '/public'));
+    //this.use(gzippo.staticGzip(__dirname + '/public'));    
     this.use(everyauth.middleware());
     // Keep this as last one
     this.use(this.router);
