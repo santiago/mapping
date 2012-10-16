@@ -5,8 +5,8 @@
 var express = require('express');
 var everyauth = require('everyauth');
 var stylus = require('stylus');
-var gzippo = require('gzippo');
-var app = module.exports = express.createServer();
+// var gzippo = require('gzippo');
+var app = module.exports = express();
 
 var env= require('./env');
 app.env = env;
@@ -24,12 +24,12 @@ require('./lib/Auth')(app);
 app.configure(function(){
     this.set('views', __dirname + '/views');
     this.set('view engine', 'jade');
-    this.set('view options', { layout: 'layout' })
+    // this.set('view options', { layout: true })
     this.use(express.bodyParser());
     this.use(express.logger());
     this.use(express.methodOverride());
-    this.use(express.cookieParser());
-    this.use(express.session({secret: 'Eah4tfzGAKhr'}));
+    this.use(express.cookieParser('Eah4tfzGAKhr'));
+    this.use(express.session());
     this.use(stylus.middleware({
 	    src: __dirname + '/views'
 	    , dest: __dirname + '/public'
@@ -53,10 +53,10 @@ app.configure('production', function(){
 
 app.get('/', function(req, res) {
 	res.render('index', {
-	    locals: {
-		    nodes: []
+		    nodes: [],
+            everyauth: req.session.auth||{}
 	    }
-	});
+    );
 });
 
 var templates = require('./templates');

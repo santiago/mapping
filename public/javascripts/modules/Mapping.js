@@ -348,6 +348,10 @@ return function(app) {
         
         getPointById: function(mapping_id, point_id, callback) {
             var view = this;
+            
+            this.mapping_id = mapping_id;
+            this.point_id = point_id;
+            
             MappingView.getMappingById(mapping_id, function(mapping) {
                 view.point = _.find(mapping.get('points'), function(p) {
                     return p._id == point_id
@@ -365,6 +369,9 @@ return function(app) {
                 view.setElement($('.rslide-card.point').get());
                 callback();
                 
+                // Setup file upload
+                view.savePhoto();
+                
                 // Hide file input
                 var wrapper = $('<div/>').css({height:0,width:0,'overflow':'hidden'});
                 var fileInput = $(':file').wrap(wrapper);
@@ -381,6 +388,32 @@ return function(app) {
         },
         
         savePhoto: function() {
+            $("#upload").html5_upload({
+                url: '/mappings/'+this.mapping_id+'/points/'+this.point_id+'/image',
+                sendBoundary: window.FormData || $.browser.mozilla,
+                onStart: function(event, total) {
+                    // return true;
+                    return confirm("You are trying to upload " + total + " files. Are you sure?");
+                },
+                onProgress: function(event, progress, name, number, total) {
+                    console.log(progress, number);
+                },
+                setName: function(text) {
+                    // $("#progress_report_name").text(text);
+                },
+                setStatus: function(text) {
+                    // $("#progress_report_status").text(text);
+                },
+                setProgress: function(val) {
+                    // $("#progress_report_bar").css('width', Math.ceil(val * 100) + "%");
+                },
+                onFinishOne: function(event, response, name, number, total) {
+                    //alert(response);
+                },
+                onError: function(event, name, error) {
+                    alert('error while uploading file ' + name);
+                }
+            });
         }
     }));
     

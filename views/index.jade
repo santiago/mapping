@@ -1,59 +1,61 @@
-article#main
-  header.top(style='float:right;')
-    .current-mapping [ Medell&iacute;n ]
-    - if (everyauth.loggedIn)
-      .account
-        - var user= everyauth.facebook.user
-        - var photo= everyauth.facebook ? "http://graph.facebook.com/"+user.id+"/picture?type=small" : ""
-        img(height="30", src="#{photo}")
-        p #{user.name}
+extends layout
+
+block main
+  article#main
+    header.top(style='float:right;')
+      .current-mapping [ Medell&iacute;n ]
+      - if (everyauth.loggedIn)
+        .account
+          - var user= everyauth.facebook.user
+          - var photo= everyauth.facebook ? "http://graph.facebook.com/"+user.id+"/picture?type=small" : ""
+          img(height="30", src="#{photo}")
+          p #{user.name}
 
 
-    #top-nav
-      ul
-        - if (!everyauth.loggedIn)
+      #top-nav
+        ul
+          - if (!everyauth.loggedIn)
+            li.right
+              a.action.login(href="#login") Entrar
+              span.toggle-text(style='display:none;') Entrar
+          - else
+            li.right.salir
+              a.salir(href="/logout") Salir
+              span.toggle-text(style='display:none;') Salir
+
+            li.right
+              a.mis-mapas.action.on(href="#mappings") Mis Mapas
+              span.toggle-text(style='display:none;') Mis Mapas
+
           li.right
-            a.action.login(href="#login") Entrar
-            span.toggle-text(style='display:none;') Entrar
-        - else
-          li.right.salir
-            a.salir(href="/logout") Salir
-            span.toggle-text(style='display:none;') Salir
+            a.action.search(href="#search") Buscar
+            span.toggle-text(style='display:none;') Buscar
 
-          li.right
-            a.mis-mapas.action.on(href="#mappings") Mis Mapas
-            span.toggle-text(style='display:none;') Mis Mapas
+    section
+      #map
 
-        li.right
-          a.action.search(href="#search") Buscar
-          span.toggle-text(style='display:none;') Buscar
+  .bg-rslide-card
 
-  section
-    #map
+  -if (!everyauth.loggedIn)
+    .rslide-card.login
+      h2 Con&eacute;ctate!
+      .login-buttons
+        #fb-button(style='background-position: left -188px')
+          a.fb_button_medium(href='/auth/facebook')
+            span
+        #gg-button
+          a.gg_button_medium(href='/auth/google', style='border: 0px')
+            span
 
-.bg-rslide-card
+    .rslide-card.search.active
+      include includes/node_list
 
--if (!everyauth.loggedIn)
-  .rslide-card.login
-    h2 Con&eacute;ctate!
-    .login-buttons
-      #fb-button(style='background-position: left -188px')
-        a.fb_button_medium(href='/auth/facebook')
-          span
-      #gg-button
-        a.gg_button_medium(href='/auth/google', style='border: 0px')
-          span
-
-  .rslide-card.search.active
-    include includes/node_list
-
--if (everyauth.loggedIn)
-  .rslide-card.search
-    include includes/node_list
-  .rslide-card.mis-mapas.active
-    include includes/mymappings
+  -if (everyauth.loggedIn)
+    .rslide-card.search
+      include includes/node_list
+    .rslide-card.mis-mapas.active
+      include includes/mymappings
 
 
-.maplabel.layout(style='hidden')
-  p &nbsp;
-
+  .maplabel.layout(style='hidden')
+    p &nbsp;

@@ -1,3 +1,4 @@
+var formidable = require('formidable');
 var ServiceBase = require('../lib/ServiceBase');
 var Store = require('../lib/Store');
 
@@ -40,15 +41,28 @@ var Service = function(app) {
     ServiceBase.call(this, app, null);
     
     app.post('/mappings/:mapping_id/points/:point_id/image', this.beforePost, function(req, res) {
-        MappingStore.findById(req.params.mapping_id, function(err, mapping) {
-            req.body.loc = [parseFloat(req.body.lat), parseFloat(req.body.lon)];
-            delete req.body['lat'];
-            delete req.body['lon'];
-            mapping.points.push(req.body);
-            mapping.save(function(err, ok) {
-                res.send({ ok: true });
+        var form = new formidable.IncomingForm;
+
+        form.onPart = function (part) {
+            console.log('part');
+            console.log(part);
+            if (!part.filename) return this.handlePart(part);
+            
+            console.log(part);
+            
+            part.on('data', function(buffer) {
+                console.log(buffer)
             });
-        });
+            
+            part.on('end', function() {
+                console.log('wuu!!')
+                res.send('ok')
+            });
+            
+            // gm(part).resize(200, 200).stream(function (err, stdout, stderr) {
+            //    stdout.pipe(fs.createWriteStream('my/new/path/to/img.png'));
+            //});
+        };
     });
     
     app.post('/mappings/:mapping_id/points', this.beforePost, function(req, res) {
