@@ -379,7 +379,14 @@ return function(app) {
                     var $this = $(this);
                     $('#file').text($this.val());
                 });
-
+            });
+            
+            this.point.image.forEach(function(name) {
+                dust.render('point_photo_item', { name: name }, function(err, html) {
+                    var $li = $('<li/>');
+                    $li.append(html);
+                    view.$el.find('ul.photos').append($li);
+                });
             });
         },
         

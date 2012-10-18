@@ -19,6 +19,7 @@
     "dustjs-linkedin": "1.1.0",
     "awssum": "0.11.0",
     "gm": "1.5.1",
-    "formidable": "1.0.11"
+    "formidable": "1.0.11",
+    "qs": "0.5.1"
   }
 }

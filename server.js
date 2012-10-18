@@ -5,8 +5,9 @@
 var express = require('express');
 var everyauth = require('everyauth');
 var stylus = require('stylus');
-// var gzippo = require('gzippo');
 var app = module.exports = express();
+
+console.log('--> init ----------------------------------------')
 
 var env= require('./env');
 app.env = env;
@@ -24,8 +25,11 @@ require('./lib/Auth')(app);
 app.configure(function(){
     this.set('views', __dirname + '/views');
     this.set('view engine', 'jade');
-    // this.set('view options', { layout: true })
-    this.use(express.bodyParser());
+    
+    // bodyParser without multipart
+    this.use(express.json());
+    this.use(express.urlencoded());
+ 
     this.use(express.logger());
     this.use(express.methodOverride());
     this.use(express.cookieParser('Eah4tfzGAKhr'));
@@ -37,7 +41,7 @@ app.configure(function(){
     }));
     this.use(express.favicon(__dirname + '/public/favicon.ico', { maxAge: 2592000000}));
     this.use(express.static(__dirname + '/public'));
-    //this.use(gzippo.staticGzip(__dirname + '/public'));    
+
     this.use(everyauth.middleware());
     // Keep this as last one
     this.use(this.router);
@@ -67,8 +71,8 @@ app.get('/javascripts/compiled_tpls.js', function(req, res) {
 
 // Start Services
 app.services = {};
-['Mapping', 'Point', 'Comment'].forEach(function(name) {
-    var services = require('./domain/'+name).service;
+['Mapping'].forEach(function(name) {
+    var services = require('./service/'+name);
     if (!(services instanceof Array)) {
         services = [services]
     }
@@ -76,6 +80,8 @@ app.services = {};
         app.services[name] = s(app);
     });
 });
+
+// require('./lib/Upload')
 
 // Only listen on $ node app.js
 if (!module.parent) {
