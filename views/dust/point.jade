@@ -13,16 +13,32 @@
     - // input(name='tags', value='{tags}')
     label Direcci&oacute;n
     input(name='address', value='{address}')
-    header.photos
-      label Fotos
-      span
-        button#addphoto.css3button + Agregar foto
-        input#upload(type="file", multiple="multiple")
-    ul.photos(style='position: relative;')
-      
-      
-      button#savephoto.css3button.blue-1 Guardar Foto
-      li(style='display:none;')
-        .point-item
-          span.marker-icon
-          a(href='#') Foto
+    section#media
+      ul
+        li.media-image
+          .media-wrapper
+            label Im&aacute;genes
+            span
+              button#addphoto.css3button + Agregar &nbsp;Im&aacute;genes
+              input#upload(type="file", multiple="multiple")
+            a.show(href='#') Ver im&aacute;genes
+        li.media-video
+          .media-wrapper
+            label Videos
+            span
+              button#addvideo.css3button + Agregar &nbsp;Videos
+              input#upload-video(type="file", multiple="multiple")
+            a.show(href='#') Ver videos
+        li.media-audio
+          .media-wrapper        
+            label Audios
+            span
+              button#addaudio.css3button + Agregar &nbsp;Audios
+              input#upload-audio(type="file", multiple="multiple")
+            a.show(href='#') Ver audios
+
+#galleria-wrapper.apple_overlay
+  #galleria-bg-overlay
+  #galleria-overlay
+    #galleria
+      p Hola

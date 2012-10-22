@@ -339,8 +339,7 @@ return function(app) {
     
     var PointView = new (Backbone.View.extend({
         events: {
-            'click #addphoto': 'addPhoto',
-            'click #savephoto': 'savePhoto'
+            'click #addphoto': 'addPhoto'
         },
 
         initialize: function() {
@@ -364,13 +363,15 @@ return function(app) {
             var view = this;
 
             dust.render('point', this.point, function(err, html) {
+                // Remove existing data
                 $('.rslide-card.point').remove();
+                $('#galleria-wrapper').remove();
+                
                 $('.rslide-card:last').after(html);
                 view.setElement($('.rslide-card.point').get());
-                callback();
                 
-                // Setup file upload
-                view.savePhoto();
+                // Setup photo upload
+                view.photoUpload();
                 
                 // Hide file input
                 var wrapper = $('<div/>').css({height:0,width:0,'overflow':'hidden'});
@@ -379,22 +380,33 @@ return function(app) {
                     var $this = $(this);
                     $('#file').text($this.val());
                 });
+                // Tell the world you've finished rendering
+                if(typeof callback == 'function') callback();
             });
             
-            this.point.image.forEach(function(name) {
+            for(var i in this.point.image) {
+                var name = this.point.image[i];
                 dust.render('point_photo_item', { name: name }, function(err, html) {
                     var $li = $('<li/>');
+                    if(i % 2 == 0) $li.addClass('left')
+                    else $li.addClass('right')
                     $li.append(html);
+                    $li.find('a').attr('index', i);
                     view.$el.find('ul.photos').append($li);
+                    
+                    // Setup media gallery only last image is appended
+                    if(i == view.point.image.length-1) {
+                        view.mediaGallery();
+                    }
                 });
-            });
+            }
         },
         
         addPhoto: function() {
-            $(':file').click();
+            $('.media-image :file').click();
         },
         
-        savePhoto: function() {
+        photoUpload: function() {
             $("#upload").html5_upload({
                 url: '/mappings/'+this.mapping_id+'/points/'+this.point_id+'/image',
                 sendBoundary: window.FormData || $.browser.mozilla,
@@ -421,6 +433,86 @@ return function(app) {
                     alert('error while uploading file ' + name);
                 }
             });
+        },
+        
+        mediaGallery: function() {
+            var view = this;
+            var height = this.$el.find('ul.photos').height();
+            var pageSize = this.$el.find('.photos-wrapper').height()-1;
+            var pages = (height/pageSize)|0;
+            
+            var currentPage = 0;
+            
+            if(pages > 0) {
+                view.$el.find('.photos-wrapper a.next').show();
+            }
+            
+            // Links for launching media gallery
+            this.$el.find('#media a.show').click(function(e) {
+                e.preventDefault();
+                $(this).blur()
+                
+                if ($(this).closest('li').hasClass('media-image')) {
+                    $('#galleria-wrapper').css({'z-index':1});
+                    if(!$('#galleria-wrapper').overlay().isOpened()) {
+                        $('#galleria-wrapper').overlay().load();
+                    }
+                    // Galleria.get(0).show(index);
+                }
+                
+            });
+            
+            
+            /* Pages are 0-indexed */
+            function goToPage(page) {
+                if(page == 0) {
+                    view.$el.find('.photos-wrapper a.prev').fadeOut();
+                } else if(page > 0) {
+                    view.$el.find('.photos-wrapper a.prev').fadeIn();
+                }
+                
+                if(page == pages) {
+                    view.$el.find('.photos-wrapper a.next').fadeOut();
+                } else if (page < pages) {
+                    view.$el.find('.photos-wrapper a.next').fadeIn();
+                }
+                
+                view.$el.find('.scroller-wrapper').scrollTo(page*pageSize, 600)
+            }
+            
+            // Set scrollable ul.photos
+            this.$el.find('.photos-wrapper .scroller-bottom a').click(function(e) {
+                e.preventDefault();
+                $(this).blur();
+                if($(this).hasClass('next')) {
+                    if(currentPage == pages) return;
+                    goToPage(++currentPage)
+                } else if($(this).hasClass('prev')) {
+                    if(currentPage == 0) return;
+                    goToPage(--currentPage)
+                }
+            });
+            
+            // Setup Galleria plugin
+            var GalleriaData = this.point.image.map(function(img) {
+                return {
+                    thumb: 'https://s3.amazonaws.com/ow-mapping/200-'+img,
+                    image: 'https://s3.amazonaws.com/ow-mapping/'+img
+                }
+            });
+
+            if(this.__galleria) {
+                Galleria.get(0).destroy();
+            }
+            Galleria.loadTheme('/javascripts/thirdparty/galleria/themes/classic/galleria.classic.min.js');
+            Galleria.ready(function() {
+                $('#galleria-wrapper').overlay({
+                    fixed: false,
+                    top: 32
+                });
+                view.__galleria = true;
+            });
+            Galleria.run('#galleria', { dataSource: GalleriaData });
         }
     }));
     

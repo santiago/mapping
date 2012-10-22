@@ -16,6 +16,7 @@ li {
 body {
   font-family: "Lucida Grande", Arial, Helvetica, Verdana, sans-serif;
   overflow: hidden;
+  background: #eee;
 }
 .ajaxloader {
   width: 16px;
@@ -250,6 +251,7 @@ header.top li.right {
 .rslide-card {
   width: 450px;
   position: absolute;
+  z-index: 10;
   top: 32px;
   right: -450px;
 }
@@ -688,6 +690,7 @@ article#mis-mapas .mapping-item span.icon {
 }
 .rslide-card.point article {
   padding: 20px;
+  height: 100%;
 }
 .rslide-card.point h2,
 .rslide-card.point input,
@@ -712,6 +715,105 @@ article#mis-mapas .mapping-item span.icon {
 }
 .rslide-card.point ul.photos {
   width: 100%;
+  float: left;
+  background: #333;
+  -moz-border-radius-topleft: 3px;
+  -webkit-border-top-left-radius: 3px;
+  border-top-left-radius: 3px;
+  -moz-border-radius-topright: 3px;
+  -webkit-border-top-right-radius: 3px;
+  border-top-right-radius: 3px;
+  -moz-border-radius-bottomleft: 3px;
+  -webkit-border-bottom-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  -moz-border-radius-bottomright: 3px;
+  -webkit-border-bottom-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  position: relative;
+}
+.rslide-card.point ul.photos li {
+  width: 205px;
+}
+.rslide-card.point ul.photos li.left {
+  float: left;
+}
+.rslide-card.point ul.photos li.right {
+  float: right;
+}
+.rslide-card.point ul.photos .photo-item {
+  padding: 2px;
+}
+.rslide-card.point .photos-wrapper {
+  width: 100%;
+  height: 60%;
+  float: left;
+  margin-top: 10px;
+  position: relative;
+  -moz-border-radius-topleft: 3px;
+  -webkit-border-top-left-radius: 3px;
+  border-top-left-radius: 3px;
+  -moz-border-radius-topright: 3px;
+  -webkit-border-top-right-radius: 3px;
+  border-top-right-radius: 3px;
+  -moz-border-radius-bottomleft: 3px;
+  -webkit-border-bottom-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  -moz-border-radius-bottomright: 3px;
+  -webkit-border-bottom-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.rslide-card.point .scroller-wrapper {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  float: left;
+  -moz-border-radius-topleft: 3px;
+  -webkit-border-top-left-radius: 3px;
+  border-top-left-radius: 3px;
+  -moz-border-radius-topright: 3px;
+  -webkit-border-top-right-radius: 3px;
+  border-top-right-radius: 3px;
+  -moz-border-radius-bottomleft: 3px;
+  -webkit-border-bottom-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  -moz-border-radius-bottomright: 3px;
+  -webkit-border-bottom-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.rslide-card.point .scroller-bottom {
+  -moz-border-radius-topleft: 0;
+  -webkit-border-top-left-radius: 0;
+  border-top-left-radius: 0;
+  -moz-border-radius-topright: 0;
+  -webkit-border-top-right-radius: 0;
+  border-top-right-radius: 0;
+  -moz-border-radius-bottomleft: 3px;
+  -webkit-border-bottom-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  -moz-border-radius-bottomright: 3px;
+  -webkit-border-bottom-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 7%;
+  background: #333;
+  opacity: 0.9;
+}
+.rslide-card.point .scroller-bottom a.prev,
+.rslide-card.point .scroller-bottom a.next {
+  margin-top: 5px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
+.rslide-card.point .scroller-bottom a.prev {
+  margin-left: 10px;
+  float: left;
+}
+.rslide-card.point .scroller-bottom a.next {
+  margin-right: 10px;
+  float: right;
 }
 .rslide-card.point input,
 .rslide-card.point textarea {
@@ -776,4 +878,103 @@ article#mis-mapas .mapping-item span.icon {
 }
 .rslide-card.point section#newphoto label.title {
   margin-top: 8px;
+}
+.rslide-card.point section#media .media-image,
+.rslide-card.point section#media .media-video,
+.rslide-card.point section#media .media-audio {
+  float: left;
+  width: 100%;
+  padding: 5px 0;
+  border: 1px solid #ccc;
+  background: #eee;
+  -moz-border-radius-topleft: 4px;
+  -webkit-border-top-left-radius: 4px;
+  border-top-left-radius: 4px;
+  -moz-border-radius-topright: 4px;
+  -webkit-border-top-right-radius: 4px;
+  border-top-right-radius: 4px;
+  -moz-border-radius-bottomleft: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  -moz-border-radius-bottomright: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  margin-bottom: 10px;
+}
+.rslide-card.point section#media .media-image button,
+.rslide-card.point section#media .media-video button,
+.rslide-card.point section#media .media-audio button {
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 900;
+  float: left;
+  cursor: pointer;
+}
+.rslide-card.point section#media .media-image label,
+.rslide-card.point section#media .media-video label,
+.rslide-card.point section#media .media-audio label {
+  float: left;
+  width: 100%;
+  margin-bottom: 4px;
+}
+.rslide-card.point section#media .media-image span,
+.rslide-card.point section#media .media-video span,
+.rslide-card.point section#media .media-audio span {
+  float: right;
+}
+.rslide-card.point section#media .media-image a.show,
+.rslide-card.point section#media .media-video a.show,
+.rslide-card.point section#media .media-audio a.show {
+  font-size: 11px;
+  text-decoration: underline;
+  float: left;
+  color: #00f;
+}
+.rslide-card.point section#media .media-wrapper {
+  padding: 0 5px;
+}
+#galleria-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: -1;
+}
+#galleria-wrapper a.close {
+  background: url("/images/overlay/close.png") no-repeat 0 0;
+  width: 36px;
+  height: 36px;
+  position: absolute;
+  z-index: 20;
+  left: 60.5%;
+}
+#galleria-bg-overlay,
+#galleria-overlay {
+  position: absolute;
+  top: 15px;
+  left: 30px;
+  width: 60%;
+  height: 90%;
+}
+#galleria-bg-overlay {
+  background: #333;
+  opacity: 0.9;
+  -moz-border-radius-topleft: 4px;
+  -webkit-border-top-left-radius: 4px;
+  border-top-left-radius: 4px;
+  -moz-border-radius-topright: 4px;
+  -webkit-border-top-right-radius: 4px;
+  border-top-right-radius: 4px;
+  -moz-border-radius-bottomleft: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  -moz-border-radius-bottomright: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+#galleria {
+  width: 100%;
+  height: 100%;
+}
+#galleria .galleria-container {
+  background: none;
 }

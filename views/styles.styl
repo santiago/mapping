@@ -49,6 +49,7 @@ li
 body
   font-family: "Lucida Grande",Arial,Helvetica,Verdana,sans-serif
   overflow: hidden
+  background: #EEE
 
 .ajaxloader
   width: 16px
@@ -216,6 +217,7 @@ header.top
 .rslide-card
   width: 450px
   position: absolute
+  z-index: 10
   top: 32px
   right: -450px
   &.active  
@@ -523,6 +525,7 @@ article#mis-mapas
 .rslide-card.point
   article
     padding: 20px
+    height: 100%
   h2, input, textarea
     margin-bottom: 5px
   h2, label, input, ul.points, textarea
@@ -536,6 +539,52 @@ article#mis-mapas
     font-weight: bold
   ul.photos
     width: 100%
+    float: left
+    background: #333
+    corner(3px)
+    position: relative
+    li
+      width: 205px
+      &.left
+        float: left
+      &.right
+        float: right
+    .photo-item
+      padding: 2px
+
+  .photos-wrapper
+    width: 100%
+    height: 60%
+    float: left
+    margin-top: 10px
+    position: relative
+    corner(3px)
+  .scroller-wrapper
+    height: 100%
+    width: 100%
+    overflow: hidden
+    float: left
+    corner(3px)
+    
+  .scroller-bottom
+    corner-bottom(3px)
+    position: absolute
+    bottom: 0
+    width: 100%
+    height: 7%
+    background: #333
+    opacity: 0.9
+    a.prev, a.next
+      margin-top: 5px
+      color: white
+      font-size: 12px
+      font-weight: 900
+    a.prev
+      margin-left: 10px
+      float: left
+    a.next
+      margin-right: 10px
+      float: right
 
   input, textarea
     width: 100%
@@ -555,3 +604,62 @@ article#mis-mapas
       padding: 10px 10px
     label.title
       margin-top: 8px
+
+  section#media
+    .media-image, .media-video, .media-audio
+      float: left
+      width: 100%
+      padding: 5px 0
+      border: 1px solid #CCC
+      background: #EEE
+      corner(4px)
+      margin-bottom: 10px
+      button
+        button()
+      label
+        float: left
+        width: 100%
+        margin-bottom: 4px
+      span
+        float: right
+      a.show
+        font-size: 11px
+        text-decoration: underline
+        float: left
+        color: blue
+
+    .media-wrapper
+      padding: 0 5px
+
+#galleria-wrapper
+  width: 100%
+  height: 100%
+  position: absolute
+  z-index: -1
+
+  a.close
+    background: url('/images/overlay/close.png') no-repeat 0 0
+    width: 36px
+    height: 36px
+    position: absolute
+    z-index: 20
+    left: 60.5%
+
+
+#galleria-bg-overlay, #galleria-overlay
+  position: absolute
+  top: 15px
+  left: 30px
+  width: 60%
+  height: 90%
+
+#galleria-bg-overlay
+  background: #333
+  opacity: 0.9
+  corner(4px)
+
+#galleria
+  width: 100%
+  height: 100%
+  .galleria-container
+    background: none
