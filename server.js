@@ -5,9 +5,8 @@
 var express = require('express');
 var everyauth = require('everyauth');
 var stylus = require('stylus');
+var nib = require('nib');
 var app = module.exports = express();
-
-console.log('--> init ----------------------------------------')
 
 var env= require('./env');
 app.env = env;
@@ -16,7 +15,8 @@ app.env = env;
 function compile(str, path) {
     return stylus(str)
 	.set('filename', path)
-	// .set('compress', true);
+	.set('compress', true)
+    .use(nib())
 }
 
 // Start Auth
@@ -35,9 +35,9 @@ app.configure(function(){
     this.use(express.cookieParser('Eah4tfzGAKhr'));
     this.use(express.session());
     this.use(stylus.middleware({
-	    src: __dirname + '/views'
-	    , dest: __dirname + '/public'
-	    , compile: compile
+	    src: __dirname + '/views', 
+        dest: __dirname + '/public', 
+        compile: compile
     }));
     this.use(express.favicon(__dirname + '/public/favicon.ico', { maxAge: 2592000000}));
     this.use(express.static(__dirname + '/public'));

@@ -42,8 +42,9 @@ return function(app) {
     /*  @View MyMappingsView
      *
      */
+    var el = $('#mis-mapas').get();
     var MyMappingsView = Backbone.View.extend({
-        el: $('#mis-mapas').get(),
+        el: el,
 
         events: {
             "click button#addmap": "openNewMap",
@@ -137,7 +138,10 @@ return function(app) {
             this.points = new PointList;
             this.points.on('sync', function(e) {
                 this.closeNewPoint();
-                this.refresh();
+                this.refresh(onRefresh);
+                function onRefresh() {
+                    $('.rslide-card.mapping').addClass('active')
+                }
             }.bind(this));
         },
 
@@ -183,7 +187,7 @@ return function(app) {
             var mapping = this.model.toJSON();
             $('.rslide-card.mapping').remove();
             dust.render('mapping', mapping, function(err, html) {
-                $('.rslide-card:last').after(html);
+                $('.rslide-card:last').after(html);                
                 view.setElement($('.rslide-card.mapping').get());
             });
 
@@ -215,11 +219,12 @@ return function(app) {
             this.popup(popupPoint, data._id, data.title);
         },
         
-        refresh: function() {
+        refresh: function(callback) {
             var view = this;
             this.model.fetch({
                 success: function() {
                     view.render();
+                    callback();
                 }
             });
         },
@@ -337,6 +342,32 @@ return function(app) {
         }
     }));
     
+    var MediaGallery = new (Backbone.View.extend({
+        initialize: function() {
+            var view = this;
+            dust.render('media_gallery', {}, function(err, html) {
+                $('.root-wrapper').append(html)
+                go();
+            });
+            
+            function go() {
+                Galleria.loadTheme('/javascripts/thirdparty/galleria/themes/classic/galleria.classic.min.js');
+                Galleria.ready(function() {
+                    $('#galleria-wrapper').overlay({
+                        fixed: false,
+                        top: 32
+                    });
+                    view.galleria = Galleria.get(0);
+                });
+                Galleria.run('#galleria', { dataSource: [{image:'/images/marker.png'}] });
+            }
+        },
+        
+        load: function(data) {
+            this.galleria.load(data);
+        }
+    }));
+    
     var PointView = new (Backbone.View.extend({
         events: {
             'click #addphoto': 'addPhoto'
@@ -365,7 +396,6 @@ return function(app) {
             dust.render('point', this.point, function(err, html) {
                 // Remove existing data
                 $('.rslide-card.point').remove();
-                $('#galleria-wrapper').remove();
                 
                 $('.rslide-card:last').after(html);
                 view.setElement($('.rslide-card.point').get());
@@ -384,6 +414,10 @@ return function(app) {
                 if(typeof callback == 'function') callback();
             });
             
+            if (this.point.image.length === 0) {
+                this.$el.find('.media-image a.show').remove();
+            }
+            
             for(var i in this.point.image) {
                 var name = this.point.image[i];
                 dust.render('point_photo_item', { name: name }, function(err, html) {
@@ -394,7 +428,7 @@ return function(app) {
                     $li.find('a').attr('index', i);
                     view.$el.find('ul.photos').append($li);
                     
-                    // Setup media gallery only last image is appended
+                    // Setup media gallery when last image is appended
                     if(i == view.point.image.length-1) {
                         view.mediaGallery();
                     }
@@ -407,15 +441,48 @@ return function(app) {
         },
         
         photoUpload: function() {
+            var view = this;
+            
+            this.$el.find('.image-upload .control a').click(function(e) {
+                e.preventDefault();
+                $(this).blur();
+                
+                if ($(this).hasClass('cancel')) {
+                    view.cancelUpload();
+                }
+                if ($(this).hasClass('skip')) {
+                    view.skipCurrentUpload();
+                }
+            });
+            
             $("#upload").html5_upload({
                 url: '/mappings/'+this.mapping_id+'/points/'+this.point_id+'/image',
                 sendBoundary: window.FormData || $.browser.mozilla,
                 onStart: function(event, total) {
-                    // return true;
-                    return confirm("You are trying to upload " + total + " files. Are you sure?");
+                    // view.__progress = 0;
+                    //$('.meter > span').width(0);
+                    //$('.meter > span').removeClass('stop')
+                    
+                    var check = confirm("Está subiendo un total de " + total + " imágenes. ¿Desea continuar?");
+                    if (check) {
+                        $('.image-upload').find('.control p span.index').text(' 1');
+                        $('.image-upload').find('.control p span.total').text(total);
+                        $('#addphoto').fadeOut(function() {
+                            $('.image-upload').slideDown();
+                        });
+                    }
+                    return check;
+                },
+                onStartOne: function(event, name, number, total) {
+                    view.__progress = 0;
+                    view.__uploading = true;
+                    $('.meter > span').removeClass('stop');
+                    $('.image-upload').find('.control p span.index').text(' ' + (number + 1));
+                    view.startProgressBar();
+                    return true;
                 },
                 onProgress: function(event, progress, name, number, total) {
-                    console.log(progress, number);
+                    view.__progress = parseFloat((progress*100).toString().slice(0,5));
                 },
                 setName: function(text) {
                     // $("#progress_report_name").text(text);
@@ -427,25 +494,92 @@ return function(app) {
                     // $("#progress_report_bar").css('width', Math.ceil(val * 100) + "%");
                 },
                 onFinishOne: function(event, response, name, number, total) {
-                    //alert(response);
+                    // view.__progress = 0;
+                    if (number+1 === total) {
+                        $('#addphoto').fadeIn();
+                        $('.image-upload').slideUp();
+                    }
+                },
+                onCancelOne: function() {
+                    console.log('canceled!');
                 },
                 onError: function(event, name, error) {
                     alert('error while uploading file ' + name);
                 }
+            })
+        },
+        
+        cancelUpload: function() {
+            var view = this;
+
+            $('.media-image #upload:first').triggerHandler('html5_upload.cancelAll');
+            $('.image-upload')
+                .find('.meter > span').addClass('stop')
+                  .end()
+                .find('.control').hide()
+                  .end()
+                .find('.cancel-info').show()
+                
+            setTimeout(function() {
+                view.closeImageUpload();
+            }, 1500);
+        },
+        
+        showImageUpload: function() {
+            $('.image-upload').slideDown();
+            $('#addphoto').fadeOut();
+        },
+        
+        closeImageUpload: function() {
+            $('.image-upload').slideUp(function() {
+                $(this)
+                    .find('.meter > span').removeClass('stop')
+                        .end()
+                    .find('.control').show()
+                        .end()
+                    .find('.cancel-info').hide()
+                    
+                $('#addphoto').fadeIn();
             });
         },
         
-        mediaGallery: function() {
+        skipCurrentUpload: function() {
             var view = this;
-            var height = this.$el.find('ul.photos').height();
-            var pageSize = this.$el.find('.photos-wrapper').height()-1;
-            var pages = (height/pageSize)|0;
-            
-            var currentPage = 0;
-            
-            if(pages > 0) {
-                view.$el.find('.photos-wrapper a.next').show();
+            $('.image-upload')
+                .find('.meter > span').addClass('stop')
+            this.__uploading = false;
+            setTimeout(function() {
+                var current = $.trim($('.image-upload .control .index').text());
+                var total = $.trim($('.image-upload .control .total').text());
+                if (current === total)
+                    view.cancelUpload()
+                else
+                    $('.media-image #upload:first').triggerHandler('html5_upload.cancelOne')
+            }, 101);
+        },
+        
+        startProgressBar: function() {
+            $('.meter > span').width(0);
+            $('.meter > span').removeClass('stop')
+
+            var view = this;
+            function go() {
+                var w = view.__progress + '%';
+                if (view.__progress == 100 || !view.__uploading) { return }
+                $(".meter > span").animate({
+                    width: w
+                }, 100, go);
             }
+            go()
+        },
+        
+        mediaGallery: function() {
+            var GalleriaData = this.point.image.map(function(img) {
+                return {
+                    thumb: 'https://s3.amazonaws.com/ow-mapping/200-'+img,
+                    image: 'https://s3.amazonaws.com/ow-mapping/'+img
+                }
+            });
             
             // Links for launching media gallery
             this.$el.find('#media a.show').click(function(e) {
@@ -454,65 +588,13 @@ return function(app) {
                 
                 if ($(this).closest('li').hasClass('media-image')) {
                     $('#galleria-wrapper').css({'z-index':1});
+                    MediaGallery.load(GalleriaData);
                     if(!$('#galleria-wrapper').overlay().isOpened()) {
                         $('#galleria-wrapper').overlay().load();
                     }
-                    // Galleria.get(0).show(index);
                 }
                 
             });
-            
-            
-            /* Pages are 0-indexed */
-            function goToPage(page) {
-                if(page == 0) {
-                    view.$el.find('.photos-wrapper a.prev').fadeOut();
-                } else if(page > 0) {
-                    view.$el.find('.photos-wrapper a.prev').fadeIn();
-                }
-                
-                if(page == pages) {
-                    view.$el.find('.photos-wrapper a.next').fadeOut();
-                } else if (page < pages) {
-                    view.$el.find('.photos-wrapper a.next').fadeIn();
-                }
-                
-                view.$el.find('.scroller-wrapper').scrollTo(page*pageSize, 600)
-            }
-            
-            // Set scrollable ul.photos
-            this.$el.find('.photos-wrapper .scroller-bottom a').click(function(e) {
-                e.preventDefault();
-                $(this).blur();
-                if($(this).hasClass('next')) {
-                    if(currentPage == pages) return;
-                    goToPage(++currentPage)
-                } else if($(this).hasClass('prev')) {
-                    if(currentPage == 0) return;
-                    goToPage(--currentPage)
-                }
-            });
-            
-            // Setup Galleria plugin
-            var GalleriaData = this.point.image.map(function(img) {
-                return {
-                    thumb: 'https://s3.amazonaws.com/ow-mapping/200-'+img,
-                    image: 'https://s3.amazonaws.com/ow-mapping/'+img
-                }
-            });
-
-            if(this.__galleria) {
-                Galleria.get(0).destroy();
-            }
-            Galleria.loadTheme('/javascripts/thirdparty/galleria/themes/classic/galleria.classic.min.js');
-            Galleria.ready(function() {
-                $('#galleria-wrapper').overlay({
-                    fixed: false,
-                    top: 32
-                });
-                view.__galleria = true;
-            });
-            Galleria.run('#galleria', { dataSource: GalleriaData });
         }
     }));
     

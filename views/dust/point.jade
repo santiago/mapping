@@ -18,27 +18,34 @@
         li.media-image
           .media-wrapper
             label Im&aacute;genes
-            span
+            span.add
               button#addphoto.css3button + Agregar &nbsp;Im&aacute;genes
               input#upload(type="file", multiple="multiple")
             a.show(href='#') Ver im&aacute;genes
+
+            .image-upload(style='display:none;')
+              p.cancel-info(style='display:none;') Se cancel&oacute; la transferencia
+              .control
+                p Subiendo
+                  span.index  0
+                  span /
+                  span.total 0
+                a.cancel(href='#') Cancelar
+                span &nbsp;&nbsp;|&nbsp;
+                a.skip(href='#') Omitir
+              .meter
+                span(style='width: 25%')
         li.media-video
           .media-wrapper
             label Videos
-            span
+            span.add
               button#addvideo.css3button + Agregar &nbsp;Videos
               input#upload-video(type="file", multiple="multiple")
             a.show(href='#') Ver videos
         li.media-audio
           .media-wrapper        
             label Audios
-            span
+            span.add
               button#addaudio.css3button + Agregar &nbsp;Audios
               input#upload-audio(type="file", multiple="multiple")
             a.show(href='#') Ver audios
-
-#galleria-wrapper.apple_overlay
-  #galleria-bg-overlay
-  #galleria-overlay
-    #galleria
-      p Hola
