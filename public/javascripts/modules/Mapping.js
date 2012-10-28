@@ -121,7 +121,7 @@ return function(app) {
             default:
                 break;
             }
-        },
+        }
     });
 
     var View = new MyMappingsView({
@@ -149,13 +149,17 @@ return function(app) {
             "click button#addpoint": "openNewPoint",
             "click #newpoint .close": "closeNewPoint",
             "click #newpoint #mappoint": "startPointing",
-            "click #newpoint #savepoint": "savePoint"
+            "click #newpoint #savepoint": "savePoint",
+            "click button#editmap": "showEdit",
+            "click button#savemap": "updateMap",
+            "click button#deletemap": "deleteMap"
         },
         
         setMapping: function(model, data) {
             this.id = model.id;
             this.model = model;
             this.points.url = '/mappings/'+this.id+'/points';
+            app.setMappingName(this.model.get('title'));
         },
         
         getMappingById: function(id, callback) {
@@ -182,20 +186,24 @@ return function(app) {
             this.__lastPoint = null;
             this._newPointMarker = null;
 
-            app.setMappingName(this.model.get('title'));
-
             var mapping = this.model.toJSON();
             $('.rslide-card.mapping').remove();
             dust.render('mapping', mapping, function(err, html) {
                 $('.rslide-card:last').after(html);                
                 view.setElement($('.rslide-card.mapping').get());
             });
+            this.renderPoints();
+        },
+        
+        renderPoints: function() {
+            var view = this;
 
             // Clear current state
             this.$el.find('ul.points li').remove();
             Map.clearPoints();
 
             // Render Points
+            var mapping = this.model.toJSON();
             mapping.points.forEach(function(point) {
                 view.renderPointLabel(point);
                 dust.render('point_item', point, function(err, html) {
@@ -224,9 +232,33 @@ return function(app) {
             this.model.fetch({
                 success: function() {
                     view.render();
-                    callback();
+                    callback(view.model);
                 }
             });
+        },
+        
+        showEdit: function() {
+        },
+        
+        updateMap: function() {
+            var title = $.trim($('[name=title]').val());
+            var description = $.trim($('[name=description]').val());
+            var tags = $.trim($('[name=tags]').val());
+            
+            if(title) {
+                this.model.set('title', $('[name=title]'));
+                this.model.set('description');
+                this.model.set('tags');
+                
+                this.model.save();
+            }
+        },
+        
+        deleteMap: function() {
+            if (confirm('¿Está seguro que desea borrar este mapa?')) {
+                this.model.destroy();
+                location.href = '#mappings'
+            }
         },
         
         /* Display dialog for adding a new Point
@@ -364,7 +396,9 @@ return function(app) {
         },
         
         load: function(data) {
-            this.galleria.load(data);
+            $('#galleria-wrapper').fadeIn(function() {
+                this.galleria.load(data);
+            }.bind(this))
         }
     }));
     
@@ -386,6 +420,7 @@ return function(app) {
                 view.point = _.find(mapping.get('points'), function(p) {
                     return p._id == point_id
                 });
+                MappingView.renderPoints();
                 view.render(callback);
             });
         },
@@ -418,22 +453,7 @@ return function(app) {
                 this.$el.find('.media-image a.show').remove();
             }
             
-            for(var i in this.point.image) {
-                var name = this.point.image[i];
-                dust.render('point_photo_item', { name: name }, function(err, html) {
-                    var $li = $('<li/>');
-                    if(i % 2 == 0) $li.addClass('left')
-                    else $li.addClass('right')
-                    $li.append(html);
-                    $li.find('a').attr('index', i);
-                    view.$el.find('ul.photos').append($li);
-                    
-                    // Setup media gallery when last image is appended
-                    if(i == view.point.image.length-1) {
-                        view.mediaGallery();
-                    }
-                });
-            }
+            this.mediaGallery();
         },
         
         addPhoto: function() {
@@ -484,29 +504,33 @@ return function(app) {
                 onProgress: function(event, progress, name, number, total) {
                     view.__progress = parseFloat((progress*100).toString().slice(0,5));
                 },
-                setName: function(text) {
-                    // $("#progress_report_name").text(text);
-                },
-                setStatus: function(text) {
-                    // $("#progress_report_status").text(text);
-                },
-                setProgress: function(val) {
-                    // $("#progress_report_bar").css('width', Math.ceil(val * 100) + "%");
-                },
-                onFinishOne: function(event, response, name, number, total) {
-                    // view.__progress = 0;
-                    if (number+1 === total) {
-                        $('#addphoto').fadeIn();
-                        $('.image-upload').slideUp();
-                    }
-                },
-                onCancelOne: function() {
-                    console.log('canceled!');
+                onFinish: function(event, response, name, number, total) {
+                    $('#addphoto').fadeIn();
+                    $('.image-upload').slideUp(function() {
+                        view.refresh()
+                    });
+                    view.__uploading = false;
                 },
                 onError: function(event, name, error) {
                     alert('error while uploading file ' + name);
                 }
             })
+        },
+        
+        refresh: function() {
+            var view = this;
+            MappingView.refresh(function(mapping) {
+                view.point = _.find(mapping.get('points'), function(p) {
+                    return p._id == view.point_id
+                });
+
+                view.render();
+                view.show();
+            });
+        },
+        
+        show: function() {
+            this.$el.addClass('active');
         },
         
         cancelUpload: function() {
@@ -565,7 +589,7 @@ return function(app) {
             var view = this;
             function go() {
                 var w = view.__progress + '%';
-                if (view.__progress == 100 || !view.__uploading) { return }
+                if (/*view.__progress == 100 || */!view.__uploading) { return }
                 $(".meter > span").animate({
                     width: w
                 }, 100, go);

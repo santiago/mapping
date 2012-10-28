@@ -13,7 +13,7 @@
     "jade": "0.27.6",
     "stylus": "0.30.0",
     "socket.io": "0.9.10",
-    "mongoose": "2.7.2",
+    "mongoose": "3.0.3",
     "everyauth": "git://github.com/bnoguchi/everyauth.git#express3",
     "gzippo": "0.1.7",
     "dustjs-linkedin": "1.1.0",

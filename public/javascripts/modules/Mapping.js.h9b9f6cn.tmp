@@ -1,0 +1,116 @@
+/*
+ *  @module Mapping
+ *  @exports function
+ *
+ */
+define(function() {
+return function(app) {
+    var Map = app.Map;
+    
+    /*  @Model Mapping
+     *
+     */
+    var Mapping = Backbone.Model.extend({
+        idAttribute: '_id',
+        urlRoot: '/mappings'
+    });
+
+    /*  @Model Point
+     *
+     */
+    var Point = Backbone.Model.extend({
+        idAttribute: '_id'
+    });
+
+    /*  @Collection MappingList
+     *
+     */
+    var MappingList = Backbone.Collection.extend({
+        model: Mapping,
+        url: '/mappings'
+    });
+    
+
+    /*  @Collection PointList
+     *
+     */
+    var PointList = Backbone.Collection.extend({
+        model: Point
+    });
+
+
+    /*  @View MyMappingsView
+     *
+     */
+    var el = $('#mis-mapas').get();
+    var MyMappingsView = Backbone.View.extend({
+        el: el,
+
+        events: {
+            "click button#addmap": "openNewMap",
+            "keypress input": "captureKey",
+            "click #newmap .close": "closeNewMap",
+            "click button#savemap": "createMapping"
+        },
+
+        initialize: function() {
+            var view = this;
+            this.render();
+            $(window).on('keydown', function(e) {
+                if (e.keyCode == 27) {
+                    view.closeNewMap();
+                }
+            });
+
+            this.collection.on('sync', function(e, f) {
+                view.render();
+                view.closeNewMap();
+                location.hash = "#mapping/"+e.id;
+            });
+        },
+
+        render: function() {
+            this.collection.fetch({
+                data: {
+                    user_id: this.user_id
+                },
+                success: function(coll, data) {
+                    $('ul.mappings').empty();
+                    data.forEach(function(item) {
+                        item.id = item._id;
+                        dust.render('mapping_item', item, function(err, html) {
+                            $('ul.mappings').append(html);
+                        });
+                    });
+                }
+            });
+        },
+
+        openNewMap: function() {
+            $('#newmap').slideDown('fast', function() {
+                // $('#newmap .close').show()
+            });
+            $('.overlay').fadeIn('fast');
+            $('#newmap input').focus();
+            $('button#addmap').fadeOut('fast');
+        },
+
+        closeNewMap: function() {
+            $('#newmap').slideUp('fast', function() {
+                // $('#newmap .close').hide()
+            });
+            $('.overlay').fadeOut('fast');
+            $('button#addmap').fadeIn('fast');
+        },
+
+        createMapping: function() {
+            var title = $.trim($('#newmap input').val());
+            if (!title) {
+                return false
+            }
+            this.collection.create({
+                title: title
+            });
+        },
+
+        captureKey: functio

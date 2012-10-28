@@ -1,8 +1,12 @@
 .rslide-card.mapping
   article.mapping(id='{id}')
-    label Mapa
-    span.edit
-      a(href='#') Editar
+    span.edit(style='display:none;')
+      button#editmap.css3button.blue-1 Editar
+    #edit
+      a.close &nbsp;
+      button#savemap.css3button.blue-1 Guardar
+      button#deletemap.css3button.blue-1 Eliminar
+    label.title.edit Mapa
     input(name='title', value='{title}')
     label Descripci&oacute;n
     p.description {description}

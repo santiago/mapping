@@ -361,6 +361,13 @@ header.top
           &:hover
             text-decoration: underline
 
+blue-button()
+  font-size: 12px
+  padding: 8px
+  float: right
+  margin-top: 10px
+  cursor: pointer
+
 button()
   padding: 1px 7px
   font-size: 11px
@@ -421,11 +428,7 @@ article#mis-mapas
     margin-left: 315px
 
   button#savemap
-    font-size: 12px
-    padding: 8px
-    float: right
-    margin-top: 10px
-    cursor: pointer
+    blue-button()
 
   section#newmap
     dropdown-popup()
@@ -440,10 +443,33 @@ article#mis-mapas
       height: 48px
 
 .rslide-card.mapping
+  button
+    &#editmap, &#deletemap, &#savemap
+      blue-button()
+      margin: 0
+    &#deletemap, &#savemap
+      margin-right: 5px
+    &#deletemap
+      border: 1px solid #E77979
+      box-shadow: none
+      background: linear-gradient(top, rgb(235,76,76), rgb(231,121,121))
+
   button#addpoint
     button()
     width: 110px
     margin: 0
+
+  #edit
+    float: right
+    border: 1px solid #AAA
+    width: 100%
+    corner(4px)
+    padding: 4px 0
+    a.close
+      float: right
+      margin-top: 8px
+      margin-right: 5px
+      opacity: 0.3
 
   header.points
     margin-top: 5px
@@ -505,6 +531,7 @@ article#mis-mapas
 
   article.mapping
     padding: 20px
+    padding-top: 10px
   h2, input, textarea
     margin-bottom: 5px
   h2, label, input, ul.points, textarea
@@ -516,11 +543,25 @@ article#mis-mapas
   label
     font-size: 12px
     font-weight: bold
+    &.title
+      margin-top: 25px
+    &.title.edit
+      margin-top: 5px
   span.edit
     width: 30%
     float: right
     font-size: 12px
     text-align: right
+  
+  a.close
+    opacity: 0.2
+    cursor: pointer
+    float: right
+    margin-top: 0px
+    width: 16px
+    height: 16px
+    background: url(/images/close-16.png) no-repeat 0 0
+
   input, textarea
     width: 100%
 
@@ -659,7 +700,7 @@ article#mis-mapas
   width: 100%
   height: 100%
   position: absolute
-  z-index: -1
+  z-index: -2
 
   a.close
     background: url('/images/overlay/close.png') no-repeat 0 0
