@@ -8,7 +8,7 @@ var stylus = require('stylus');
 var nib = require('nib');
 var app = module.exports = express();
 
-var env= require('./env');
+var env = require('./env');
 app.env = env;
 
 // Configuration
@@ -22,7 +22,7 @@ function compile(str, path) {
 // Start Auth
 require('./lib/Auth')(app);
 
-app.configure(function(){
+app.configure(function() {
     this.set('views', __dirname + '/views');
     this.set('view engine', 'jade');
     
@@ -39,7 +39,7 @@ app.configure(function(){
         dest: __dirname + '/public', 
         compile: compile
     }));
-    this.use(express.favicon(__dirname + '/public/favicon.ico', { maxAge: 2592000000}));
+    this.use(express.favicon(__dirname + '/public/favicon.ico', { maxAge: 2592000000 }));
     this.use(express.static(__dirname + '/public'));
 
     this.use(everyauth.middleware());
@@ -76,7 +76,7 @@ app.services = {};
     if (!(services instanceof Array)) {
         services = [services]
     }
-    services.forEach(function(s) { 
+    services.forEach(function(s) {
         app.services[name] = s(app);
     });
 });

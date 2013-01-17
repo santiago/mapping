@@ -5,8 +5,11 @@
  */
 define(function() {
 return function(app) {
-    var Map = app.Map;
-    
+    var Map = new app.Map();
+    $('#map').bind('mapready', function() {
+        Map.__ready = true;
+    });
+
     /*  @Model Mapping
      *
      */
@@ -215,16 +218,11 @@ return function(app) {
         },
         
         renderPointLabel: function(data) {
-            var point = new OpenLayers.LonLat(data.loc[1], data.loc[0]);
-            point.transform(
-                new OpenLayers.Projection("EPSG:4326"),
-                new OpenLayers.Projection("EPSG:900913")
-            );
-            Map.addMarker(point);
+            Map.addMarker(data.loc);
         
             // Position label
-            var popupPoint = new OpenLayers.LonLat(point.lon + 10, point.lat + 40);
-            this.popup(popupPoint, data._id, data.title);
+            // var popupPoint = new OpenLayers.LonLat(point.lon + 10, point.lat + 40);
+            // this.popup(popupPoint, data._id, data.title);
         },
         
         refresh: function(callback) {
@@ -289,7 +287,7 @@ return function(app) {
                 view.$el.find('#newpoint .info.pointing').fadeIn();
             });
             Map.startPointing();
-            Map.map.events.register('click', this, this.__onClickMap);
+            // Map.map.events.register('click', this, this.__onClickMap);
         },
         
         stopPointing: function() {
@@ -391,7 +389,7 @@ return function(app) {
                     });
                     view.galleria = Galleria.get(0);
                 });
-                Galleria.run('#galleria', { dataSource: [{image:'/images/marker.png'}] });
+                Galleria.run('#galleria', { dataSource: [{image:'/images/ajax_loader_big.gif'}] });
             }
         },
         
@@ -598,14 +596,16 @@ return function(app) {
         },
         
         mediaGallery: function() {
+            // $('#galleria').empty();
+            // MediaGallery.load([{ image: '/images/ajax_loader_big.gif' }]);
             var GalleriaData = this.point.image.map(function(img) {
                 return {
                     thumb: 'https://s3.amazonaws.com/ow-mapping/200-'+img,
                     image: 'https://s3.amazonaws.com/ow-mapping/'+img
                 }
             });
-            
-            // Links for launching media gallery
+
+            // Links for launching Media Gallery
             this.$el.find('#media a.show').click(function(e) {
                 e.preventDefault();
                 $(this).blur()
@@ -630,7 +630,13 @@ return function(app) {
             "mappings": "getMyMappings"
         },
         getMappingById: function(id) {
-            MappingView.load(id);
+            // Wait for MapBox to load asynchronously
+            var __id = setInterval(function() {
+                if(Map.__ready) {
+                    MappingView.load(id);
+                    clearInterval(__id);
+                }
+            }, 100);
         },
         getMyMappings: function() {
             app.CardSlider.show('mis-mapas');
@@ -645,19 +651,11 @@ return function(app) {
 
     
     // Detect Geolocation
-    function success(pos) {
+    function successOpenLayer(pos) {
         var position = [pos.coords.latitude, pos.coords.longitude];
         var point = new OpenLayers.LonLat(position[1], position[0]).transform(new OpenLayers.Projection("EPSG:4326"), Map.map.getProjectionObject());
         Map.map.setCenter(point, 16);
     }
 
-    function error() {}
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(success, error);
-    } else {
-        alert('Geolocation not supported');
-        return;
-    }
 }
 });

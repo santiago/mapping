@@ -4,7 +4,7 @@ requirejs.config({
 });
 
 // Start the main app logic.
-requirejs(['Layout', 'Map', 'Mapping'], function(_Layout, _Map, _Mapping) {
+requirejs(['Layout', 'MapBoxImpl', 'Mapping'], function(_Layout, _Map, _Mapping) {
     var TopNav = _Layout.TopNav;
     var CardSlider = _Layout.CardSlider;
 
