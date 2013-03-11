@@ -87,5 +87,5 @@ app.services = {};
 if (!module.parent) {
     var port = 6660;
     app.listen(port);
-    console.log("Express server listening on port %d", port)
+    console.log("Express server listening on port %d", port);
 }

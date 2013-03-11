@@ -139,13 +139,17 @@ return function(app) {
             var view = this;
             
             this.points = new PointList;
-            this.points.on('sync', function(e) {
+            this.points.on('sync', function(model) {
                 this.closeNewPoint();
                 this.refresh(onRefresh);
+                console.log('synced!');
+                console.log(model);
                 function onRefresh() {
                     $('.rslide-card.mapping').addClass('active')
                 }
             }.bind(this));
+            
+            $('#map').on('stopPointing', this.stopPointing.bind(this));
         },
 
         events: {
@@ -155,16 +159,19 @@ return function(app) {
             "click #newpoint #savepoint": "savePoint",
             "click button#editmap": "showEdit",
             "click button#savemap": "updateMap",
-            "click button#deletemap": "deleteMap"
+            "click button#deletemap": "deleteMap",
+            "click .point-item a.delete": "removePoint"
         },
-        
+
         setMapping: function(model, data) {
             this.id = model.id;
             this.model = model;
             this.points.url = '/mappings/'+this.id+'/points';
+            this.points.add(model.get('points'));
             app.setMappingName(this.model.get('title'));
         },
         
+        // Fetch a Mapping by its id from transport
         getMappingById: function(id, callback) {
             var view = this;
             var mapping = new Mapping({ _id: id });
@@ -192,7 +199,7 @@ return function(app) {
             var mapping = this.model.toJSON();
             $('.rslide-card.mapping').remove();
             dust.render('mapping', mapping, function(err, html) {
-                $('.rslide-card:last').after(html);                
+                $('.rslide-card:last').after(html);
                 view.setElement($('.rslide-card.mapping').get());
             });
             this.renderPoints();
@@ -230,7 +237,7 @@ return function(app) {
             this.model.fetch({
                 success: function() {
                     view.render();
-                    callback(view.model);
+                    if (callback) callback(view.model);
                 }
             });
         },
@@ -287,15 +294,15 @@ return function(app) {
                 view.$el.find('#newpoint .info.pointing').fadeIn();
             });
             Map.startPointing();
-            // Map.map.events.register('click', this, this.__onClickMap);
         },
         
-        stopPointing: function() {
+        stopPointing: function(e, point) {
             this.$el.find('#newpoint .info.pointing').find('.one, .two').hide();
             this.$el.find('#newpoint .info.pointing').find('.three').show();
             this.$el.find('#newpoint #savepoint').fadeIn();
-            Map.map.events.unregister('click', this, this.__onClickMap);
-            this._newPointMarker.events.register('click', this, this.__onClickNewPointMarker);
+            this.__lastPoint = [point.lat, point.lon];
+            this.$el.find('#newpoint input[name=lat]').val(point.lat);
+            this.$el.find('#newpoint input[name=lon]').val(point.lon);
         },
 
         savePoint: function() {
@@ -304,12 +311,25 @@ return function(app) {
             if(data) {
                 data.mapping_id = this.id;
                 this.points.create(data);
-                this._newPointMarker.events.unregister('click', this, this.__onClickNewPointMarker);
-                Map.map.events.unregister('click', this, this.__onClickMap);
                 
                 // Place definite marker
                 Map.addMarker(this.__lastPoint);
                 this._newPointMarker = null;
+            }
+        },
+
+        removePoint: function(e) {
+            var self = this;
+            e.preventDefault();
+            var point_id = $(e.currentTarget).closest('.point-item').attr('id');
+            if (confirm('¿Está seguro que desea borrar este punto?')) {
+                this.points.get(point_id).destroy({
+                    success: function() {
+                        self.refresh(function() {
+                            self.$el.addClass('active');
+                        });
+                    }
+                });
             }
         },
 
@@ -346,29 +366,6 @@ return function(app) {
                     border: "2px solid #666"
                 });
             });
-        },
-
-        __onClickNewPointMarker: function(e) {
-            this._newPointMarker.events.unregister('click', this, this.__onClickNewPointMarker);
-            Map.map.events.unregister('click', this, this.__onClickMap);
-            this.startPointing();
-        },
-        
-        __onClickMap: function(e) {
-            // Get Point from Event
-            var point = Map.map.getLonLatFromViewPortPx(e.xy);
-            this.__lastPoint = point.clone();
-            
-            this._newPointMarker = Map.getMarker(point);
-
-            point.transform(
-                new OpenLayers.Projection("EPSG:900913"),
-                new OpenLayers.Projection("EPSG:4326")
-            );
-            this.$el.find('#newpoint input[name=lat]').val(point.lat);
-            this.$el.find('#newpoint input[name=lon]').val(point.lon);
-
-            this.stopPointing();
         }
     }));
     

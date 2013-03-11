@@ -35,6 +35,13 @@ Mapping.addPoint = function(mapping_id, point, callback) {
     });
 };
 
+Mapping.removePoint = function(mapping_id, point_id, callback) {
+    MappingStore.findById(mapping_id, function(err, mapping) {
+        mapping.points.id(point_id).remove();
+        mapping.save(callback);
+    });
+};
+
 Mapping.addPhoto = function(mapping_id, point_id, name, callback) {
     MappingStore.findById(mapping_id, function(err, mapping) {
         var point = mapping.points.id(point_id);

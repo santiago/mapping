@@ -107,9 +107,13 @@ article#mis-mapas .mapping-item span.icon{background:url("/images/maps-icon.png"
 .rslide-card.mapping section#newpoint .info.pointing{display:none;float:left;width:100%;}
 .rslide-card.mapping section#newpoint .info.pointing span{float:left;width:100%}
 .rslide-card.mapping section#newpoint .error{float:left;margin:0;padding:0;font-size:11px;color:#f00;margin-top:7px;margin-left:5px}
-.rslide-card.mapping ul.points{width:100%;}
-.rslide-card.mapping ul.points .point-item{float:left;width:100%;padding:5px 0;}
-.rslide-card.mapping ul.points .point-item a{color:#000;font-size:14px;font-weight:900}
+.rslide-card.mapping ul.points{width:100%;padding-top:8px;}
+.rslide-card.mapping ul.points .point-item{float:left;width:95%;padding:9px 5px;}
+.rslide-card.mapping ul.points .point-item a{color:#000;font-size:14px;font-weight:900;margin:5px 0 0 5px;float:left}
+.rslide-card.mapping ul.points .point-item a.delete{display:none}
+.rslide-card.mapping ul.points .point-item:hover{padding:9px;-moz-box-shadow:inset 0 0 5px #888;-webkit-box-shadow:inset 0 0 5px #888;-webkit-box-shadow:inner 0 0 5px #888;box-shadow:inner 0 0 5px #888;-webkit-border-radius:6px;border-radius:6px;-moz-border-radius:6px;background:rgba(240,240,240,0.7);}
+.rslide-card.mapping ul.points .point-item:hover a.delete{display:block;float:right;font-size:12px;font-weight:900;margin-left:0;margin-top:7px;margin-right:7px;}
+.rslide-card.mapping ul.points .point-item:hover a.delete:hover{font-size:14px}
 .rslide-card.mapping article.mapping{padding:20px;padding-top:10px}
 .rslide-card.mapping h2,.rslide-card.mapping input,.rslide-card.mapping textarea{margin-bottom:5px}
 .rslide-card.mapping h2,.rslide-card.mapping label,.rslide-card.mapping input,.rslide-card.mapping ul.points,.rslide-card.mapping textarea{clear:left;float:left}
