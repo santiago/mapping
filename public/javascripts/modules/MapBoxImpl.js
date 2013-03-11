@@ -94,6 +94,10 @@ define(function() {
         $('#map').trigger('stopPointing', this.map.pointLocation({ x: e.pageX, y: e.pageY-32 }));
     };
     
+    Map.prototype.disablePointing = function() {
+        this.pointingLayer.disable();
+    },
+    
     Map.prototype.addMarker = function(point) {
         return this.markers.add_feature({
             geometry: {

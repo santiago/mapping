@@ -29,8 +29,8 @@ var Mapping = function() {
 Mapping.addPoint = function(mapping_id, point, callback) {
     MappingStore.findById(mapping_id, function(err, mapping) {
         mapping.points.push(point);
-        mapping.save(function(err, ok) {
-            if(callback) callback(err, ok);
+        mapping.save(function(err, mapping) {
+            if(callback) callback(err, mapping.get('points').pop());
         });
     });
 };

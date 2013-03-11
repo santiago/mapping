@@ -5,9 +5,9 @@ block main
     header.top(style='float:right;')
       .current-mapping [ Medell&iacute;n ]
       - if (everyauth.loggedIn)
-        .account
-          - var user= everyauth.facebook.user
-          - var photo= everyauth.facebook ? "http://graph.facebook.com/"+user.id+"/picture?type=small" : ""
+        - var user= everyauth.facebook ? everyauth.facebook.user : everyauth.google.user
+        - var photo= everyauth.facebook ? "http://graph.facebook.com/"+user.id+"/picture?type=small" : ""
+        .account(user_id='#{everyauth.userId}')
           img(height="30", src="#{photo}")
           p #{user.name}
 
@@ -47,8 +47,10 @@ block main
           a.gg_button_medium(href='/auth/google', style='border: 0px')
             span
 
-    .rslide-card.search.active
+    .rslide-card.search
       include includes/node_list
+    .rslide-card.latest-maps.active
+      include includes/mymappings
 
   -if (everyauth.loggedIn)
     .rslide-card.search

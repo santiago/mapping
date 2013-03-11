@@ -31,8 +31,9 @@ module.exports = function(app) {
         delete req.body['lat'];
         delete req.body['lon'];
 
-        Mapping.addPoint(req.params.mapping_id, req.body);
-        res.send({ ok: true });
+        Mapping.addPoint(req.params.mapping_id, req.body, function(err, point) {
+            res.send(point);
+        });
     });
 
     return this;

@@ -24,6 +24,7 @@ requirejs(['Layout', 'MapBoxImpl', 'Mapping'], function(_Layout, _Map, _Mapping)
     app.TopNav = TopNav;
     app.CardSlider = CardSlider;
     app.Map = _Map;
+    app.userId = $('.account').attr('user_id');
 
     var loggedIn = $('.account').length;
 
@@ -36,8 +37,8 @@ requirejs(['Layout', 'MapBoxImpl', 'Mapping'], function(_Layout, _Map, _Mapping)
         },
         
         start: function(id) {
-            if (loggedIn) app.CardSlider.show('mis-mapas')
-            else app.CardSlider.show('search')
+             if (loggedIn) app.CardSlider.show('mis-mapas')
+             else app.CardSlider.show('latest-maps') // app.CardSlider.show('search')
         },
         
         showLogin: function() {

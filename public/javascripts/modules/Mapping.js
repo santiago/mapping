@@ -45,9 +45,9 @@ return function(app) {
     /*  @View MyMappingsView
      *
      */
-    var el = $('#mis-mapas').get();
+    //    var el = $('#mis-mapas').get();
     var MyMappingsView = Backbone.View.extend({
-        el: el,
+        el: app.userId ? $('#mis-mapas').get() : $('#latest-maps').get(),
 
         events: {
             "click button#addmap": "openNewMap",
@@ -58,6 +58,7 @@ return function(app) {
 
         initialize: function() {
             var view = this;
+
             this.render();
             $(window).on('keydown', function(e) {
                 if (e.keyCode == 27) {
@@ -75,7 +76,7 @@ return function(app) {
         render: function() {
             this.collection.fetch({
                 data: {
-                    user_id: this.user_id
+                    user_id: app.userId
                 },
                 success: function(coll, data) {
                     $('ul.mappings').empty();
@@ -142,8 +143,6 @@ return function(app) {
             this.points.on('sync', function(model) {
                 this.closeNewPoint();
                 this.refresh(onRefresh);
-                console.log('synced!');
-                console.log(model);
                 function onRefresh() {
                     $('.rslide-card.mapping').addClass('active')
                 }
@@ -309,6 +308,7 @@ return function(app) {
             PointForm.setElement(this.$el.find('#newpoint'));
             var data = PointForm.getValidData();
             if(data) {
+                Map.disablePointing();
                 data.mapping_id = this.id;
                 this.points.create(data);
                 
@@ -642,6 +642,9 @@ return function(app) {
             PointView.getPointById(mapping_id, point_id, function() {
                 app.CardSlider.show('point');
             })
+        },
+        getLatest: function() {
+            
         }
     });
     new MappingRouter();

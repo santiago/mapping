@@ -1,7 +1,9 @@
 article#mis-mapas
   .overlay
-  h2 Mis Mapas
-  button.css3button#addmap + Crear Mapa
+  -var title = everyauth.loggedIn ? "Mis Mapas" : "Nuevos Mapas"
+  h2 #{title}
+  -if (everyauth.loggedIn)
+    button.css3button#addmap + Crear Mapa
   section#newmap(style='display:none;')
     span.close &nbsp;
     p Escribe un nombre para el mapa
