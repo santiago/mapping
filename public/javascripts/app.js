@@ -1,12 +1,57 @@
-var app = app || {};
-$(function($) {
-
-var AppView = Backbone.View.extend({
+requirejs.config({
+    baseUrl: 'javascripts/modules',
+    urlArgs: "bust=" + (new Date()).getTime()
 });
-app.AppView = new app.AppView;
 
-$('.current-mapping').css({ left: $(window).width()/2 - $('.current-mapping').width()/2 });
+// Start the main app logic.
+requirejs(['Layout', 'MapBoxImpl', 'Mapping'], function(_Layout, _Map, _Mapping) {
+    var TopNav = _Layout.TopNav;
+    var CardSlider = _Layout.CardSlider;
 
-Backbone.history.start();
+    var app = new(Backbone.View.extend({
+        el: window,
 
-}); // init closure
+        initialize: function() {},
+
+        setMappingName: function(name) {
+            $('.current-mapping').css({
+                left: $(window).width() / 2 - $('.current-mapping').width() / 2
+            });
+            $('.current-mapping').text('[ ' + name + ' ]');
+        }
+    }));
+
+    app.TopNav = TopNav;
+    app.CardSlider = CardSlider;
+    app.Map = _Map;
+    app.userId = $('.account').attr('user_id');
+
+    var loggedIn = $('.account').length;
+
+    var AppRouter = Backbone.Router.extend({
+        routes: {
+            "": "start",
+            "_=_": "start",
+            "login": "showLogin",
+            "search": "showSearch"
+        },
+        
+        start: function(id) {
+             if (loggedIn) app.CardSlider.show('mis-mapas')
+             else app.CardSlider.show('latest-maps') // app.CardSlider.show('search')
+        },
+        
+        showLogin: function() {
+            app.CardSlider.show('login');
+        },
+        
+        showSearch: function() {
+            app.CardSlider.show('search');
+        }
+    });
+    new AppRouter();
+
+    var Mapping = _Mapping(app);
+
+    Backbone.history.start();
+});
