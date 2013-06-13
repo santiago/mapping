@@ -61,3 +61,10 @@ block main
 
   .maplabel.layout(style='hidden')
     p &nbsp;
+
+block javascripts
+  script(type="text/javascript", src="https://raw.github.com/mihaild/jquery-html5-upload/master/jquery.html5_upload.js")
+  script(type="text/javascript", src="/javascripts/compiled_tpls.js")
+  script(type="text/javascript", src="/javascripts/thirdparty/require.js", data-main="/javascripts/App.js")
+  -if (everyauth.loggedIn)
+    script(type="text/javascript", src="/javascripts/forms.js")      

@@ -71,7 +71,7 @@ app.get('/javascripts/compiled_tpls.js', function(req, res) {
 
 // Start Services
 app.services = {};
-['Mapping'].forEach(function(name) {
+['Mapping', 'Twitter'].forEach(function(name) {
     var services = require('./service/'+name);
     if (!(services instanceof Array)) {
         services = [services]
