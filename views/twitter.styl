@@ -1,0 +1,67 @@
+@import 'nib'
+
+// ============= UTILS ==============
+corner-each(tl, tr, br, bl)
+  -moz-border-radius-topleft tl
+  -webkit-border-top-left-radius tl
+  border-top-left-radius tl
+
+  -moz-border-radius-topright tr
+  -webkit-border-top-right-radius tr
+  border-top-right-radius tr
+
+  -moz-border-radius-bottomleft bl
+  -webkit-border-bottom-left-radius bl
+  border-bottom-left-radius bl
+
+  -moz-border-radius-bottomright br
+  -webkit-border-bottom-right-radius br
+  border-bottom-right-radius br
+
+corner(px)
+  corner-each(px,px,px,px)
+
+corner-top(px)
+  corner-each(px,px,0,0)
+
+corner-bottom(px)
+  corner-each(0,0,px,px)
+
+corner-left(px)
+  corner-each(px,0,0,px)
+
+corner-right(px)
+  corner-each(0,px,px,0)
+
+// ============= UTILS ==============
+
+*
+  margin: 0
+  padding: 0
+
+html, body, root-wrapper
+  height: 100%
+
+a
+  text-decoration: none
+
+li
+  display: block
+
+body
+  font-family: "Lucida Grande",Arial,Helvetica,Verdana,sans-serif
+
+li
+  clear: left
+  padding: 10px
+  .term, .count, .pos, .exclude
+    float: left
+  .pos
+    width: 45px
+  .term
+    width: 200px
+  .count
+    width: 70px
+  .exclude
+    width: 50px
+    font-size: 12px

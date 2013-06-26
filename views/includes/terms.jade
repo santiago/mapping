@@ -1,0 +1,11 @@
+ul.terms
+  each t, i in terms
+    li.term-item
+      .pos
+        p #{i+1}.&nbsp;
+      .term
+        a(href='?q=#{t.term}') #{t.term}
+      .count
+        p #{t.count}
+      .exclude
+        a(href="#") excluir
