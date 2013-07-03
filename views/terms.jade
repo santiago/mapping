@@ -2,15 +2,22 @@
 html
   head
     meta(name='viewport', content='width=device-width, initial-scale=1.0, maximum-scale=1.0', user-scalable='no')
+    meta(name='session_id', value='#{session_id}')
     link(rel= 'stylesheet', href= '/stylesheets/css3.css', type= 'text/css')
     link(rel= 'stylesheet', href= '/twitter.css', type= 'text/css')
     link(rel= 'stylesheet', href= '/stylesheets/jquery.jgrowl.css', type= 'text/css')
+    link(rel= 'stylesheet', href= '/stylesheets/jquery.tagit.css', type= 'text/css')
+    link(rel= 'stylesheet', href= '/stylesheets/tagit.ui-zendesk.css', type= 'text/css')
     script(src="http://d3js.org/d3.v3.js")
 
     style
       body { margin:0; padding:0; }
     title cooperaciones
   body
-    include includes/terms
+    #main.wrapper
+      include includes/terms
     script(type="text/javascript", src="/javascripts/thirdparty/jquery/jquery-1.8.min.js")
+    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/tag-it.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/ws-rpc-client.js")
     script(type="text/javascript", src="/javascripts/terms.js")

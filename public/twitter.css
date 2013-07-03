@@ -2,10 +2,12 @@
 html,body,root-wrapper{height:100%}
 a{text-decoration:none}
 li{display:block}
-body{font-family:"Lucida Grande",Arial,Helvetica,Verdana,sans-serif}
-li{clear:left;padding:10px;}
-li .term,li .count,li .pos,li .exclude{float:left}
-li .pos{width:45px}
-li .term{width:200px}
-li .count{width:70px}
-li .exclude{width:50px;font-size:12px}
+body{font-family:"Lucida Grande",Arial,Helvetica,Verdana,sans-serif;padding:20px}
+#main.wrapper{padding:20px}
+li.term-item{clear:left;margin-bottom:10px;}
+li.term-item .term,li.term-item .count,li.term-item .pos,li.term-item .action{float:left}
+li.term-item .pos{width:45px}
+li.term-item .term{width:200px}
+li.term-item .count{width:70px}
+li.term-item .action{width:50px;font-size:12px;margin-right:10px}
+.tagging.ui-widget{font-size:11px}

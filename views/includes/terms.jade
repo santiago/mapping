@@ -7,5 +7,11 @@ ul.terms
         a(href='?q=#{t.term}') #{t.term}
       .count
         p #{t.count}
-      .exclude
-        a(href="#") excluir
+      .action
+        a(href="#{exc_inc}") #{exc_inc}
+      .tags
+        form
+          ul.tagging
+            -if(tags[t.term])
+              each tag in tags[t.term].split(',')
+                li #{tag}

@@ -50,11 +50,15 @@ li
 
 body
   font-family: "Lucida Grande",Arial,Helvetica,Verdana,sans-serif
+  padding: 20px
 
-li
+#main.wrapper
+  padding: 20px
+
+li.term-item
   clear: left
-  padding: 10px
-  .term, .count, .pos, .exclude
+  margin-bottom: 10px
+  .term, .count, .pos, .action
     float: left
   .pos
     width: 45px
@@ -62,6 +66,11 @@ li
     width: 200px
   .count
     width: 70px
-  .exclude
+  .action
     width: 50px
     font-size: 12px
+    margin-right: 10px
+
+// tagit component
+.tagging.ui-widget
+  font-size: 11px

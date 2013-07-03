@@ -1,7 +1,7 @@
 /**
  * Module dependencies.
  */
-
+var http = require('http');
 var express = require('express');
 var everyauth = require('everyauth');
 var stylus = require('stylus');
@@ -10,6 +10,30 @@ var app = module.exports = express();
 
 var env = require('./env');
 app.env = env;
+
+// WS
+var server = http.createServer(app);
+var ws = require('ws-rpc').extend(require('ws'));
+var wss = new ws.Server({ server: server });
+var ws_clients = {};
+app.rpc = {
+    addClient: function(id, client) {
+        delete ws_clients[id];
+        ws_clients[id] = client;
+    },
+    message: function(id, msg, args) {
+        ws_clients[id].message(msg, args);
+    },
+    broadcast: function(msg, args) {
+        wss.message(msg, args);
+    }
+};
+
+wss.on('session_id', function(client, session_id) {
+    app.rpc.addClient(session_id, client);
+});
+
+app.rpc.terms = require('./service/rpc/terms_rpc')(wss);
 
 // Configuration
 function compile(str, path) {
@@ -86,6 +110,7 @@ app.services = {};
 // Only listen on $ node app.js
 if (!module.parent) {
     var port = 6660;
-    app.listen(port);
-    console.log("Express server listening on port %d", port);
+    server.listen(port, function() {
+       console.log("Express server listening on port %d", port); 
+    });
 }
