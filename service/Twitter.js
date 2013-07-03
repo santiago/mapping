@@ -150,13 +150,12 @@ module.exports = function(app) {
         redis.sadd('exclude_terms', term, query);
 
         function query() {
-            exclude_terms(req, res, function() {
-                terms(req, res, function() {
-                    res.render('includes/terms', {
-                        terms: req.terms,
-                        exc_inc: 'exclude'
-                    });
-                });                
+            termsWithTags(req, res, function() {
+                res.render('includes/terms', {
+                    terms: req.terms,
+                    tags: req.tags,
+                    exc_inc: 'exclude'
+                });
             });
         }
     });
@@ -300,6 +299,14 @@ module.exports = function(app) {
             shingles(req, res, function() {
                 getTags(req, res, next);
             })
+        });
+    }
+
+    function termsWithTags(req, res, next) {
+        exclude_terms(req, res, function() {
+            terms(req, res, function() {
+                getTags(req, res, next);
+            });                
         });
     }
 };
