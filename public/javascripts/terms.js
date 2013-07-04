@@ -9,8 +9,6 @@ $(function() {
     });
 
     ws.on('tags', function(term, tags) {
-//        console.log(term);
-//        console.log(tags);
     });
 
     // Prepare click on 'exclude' link
@@ -62,4 +60,31 @@ $(function() {
             }
         });        
     }
+    
+    function TermsBrowser() {
+        this.path = [];
+        
+        var hash = location.hash.replace(/#/, '');
+        var query = decodeURI(hash).split('=');
+        var params = {};
+        while(query.length) {
+            var p = query.shift();
+            params[p] = query.shift();
+        }
+        
+        if(params.p) {
+            this.path = params.p.split(',').map(function(t) { return t.trim() });
+        }
+        
+        this.search();
+    }
+    
+    TermsBrowser.prototype.search = function() {
+        $.get('/twitter/terms/search', { q: this.path.join(' ') }, function(data) {
+            $('ul.terms').replaceWith(data);
+            clickExclude();
+        });
+    }
+    
+    var termsBrowser = new TermsBrowser();
 });

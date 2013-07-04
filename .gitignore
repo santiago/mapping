@@ -4,3 +4,4 @@ nohup.out
 .c9revisions
 editor
 lib/Upload/s3config.js
+public/javascripts/ui

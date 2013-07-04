@@ -2,8 +2,7 @@
 html,body,root-wrapper{height:100%}
 a{text-decoration:none}
 li{display:block}
-body{font-family:"Lucida Grande",Arial,Helvetica,Verdana,sans-serif;padding:20px}
-#main.wrapper{padding:20px}
+body{padding:20px}
 li.term-item{clear:left;}
 li.term-item .term,li.term-item .count,li.term-item .pos,li.term-item .action{float:left}
 li.term-item .pos{width:45px}

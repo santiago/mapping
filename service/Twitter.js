@@ -1,12 +1,5 @@
+var _ = require('underscore');
 var redis = require('redis').createClient();
-
-var app = module.parent;
-
-var ServiceBase = require('../lib/ServiceBase');
-
-var Mapping = require('../domain/Mapping').domain;
-var Terms = require('../domain/Terms');
-var MappingStore = require('../domain/Mapping').store;
 
 var esclient = (function() {
     var fork = true;
@@ -26,64 +19,22 @@ var es = (function() {
     return new (esclient)(opts);
 })();
 
-var termsQuery = {
-    "size": "1000",
-    "query": {
-        "match": {
-            "text": {
-                "query": "colombia mexico",
-                "operator" : "and"
-            }
-        }
-    },
-    "facets": {
-        "blah": {
-            "terms": {
-                "field": "text.terms",
-                "exclude": [
-                    "htt", "http", "https", "ca", "co", "com", "amps", "em", "lts3", "xd", "eu",
-                    "dias", "yo", "rt", "san", "mas", "si", "via", "vs", "av", "vez", "pa", "toda", "pues", "dice", "despues", "paso", "ahora", "ver", "quiero", "tambien", "gente", "da", "mejor", "todas", "creo", "mismo", "tras", "cerca", "hacia", "cada", "medio", "alguien", "primer", "primera", "aun", "muchas", "vos", "mientras", "alla", "ganas", "nadie", "super", "igual", "camino", "proximo", "ultimo", "veces", "ex", "nombre", "persona", "mejor", "mejores", "servicio", "minuto", "cara", "seria", "km", "ja", "lado", "meses", "puerta", "jaja", "jajaja", "vista", "pasado", "entrada", "casi", "sos", "fecha", "claro", "jajajajaja", "cosas", "pronto", "punto", "mes", "caso", "mil", "minutos", "saludo", "sector", "cuenta", "pais", "buenas", "ayer", "nunca", "hola", "buen", "dos", "buenos", "jajajaja", "bueno", "saludos", "personas", "buena", "unico", "junto", "alto", "bajo", "altura", "mayor", "segun", "mano", "alta", "horas", "tres",
-                    "i", "the", "at", "to", "my", "it", "with", "and", "this", "so", "do", "be", "others", "that", "of", "in", "on", "you", "for", "is", "as", "from", "am", "up", "get", "all", "out", "go", "can", "are", "i'm", "we", "by", "have", "just", "will", "your", "but", "was", "one", "not", "if", "show", "now", "time", "what", "today", "haha", "when", "city", "an", "live", "don't", "or", "can't", "back", "it's", "here", "about", "country", "know", "good", "class", "photo",
-                    "favor", "ano", "anos", "va", "asi", "hoy", "bien", "aqui", "tan", "momento", "ahi", "aca", "sino", "acabo", "ah", "luego", "more", "day", "june", 
-                    "", "lt", "gt", "gts", "na", "pm", "nao", "um", "ta", "pra", "uma", "re", "cc", "mais", "il", "et", "ma", "je", "eh", "sis", "ht", "per", "sa", "amp",
-                    "voy", "hacer", "hace", "ser", "di", "estan", "sera", "ir", "vamos", "espero", "tener", "vi", "viene", "quiere", "van", "puede", "dijo", "deja", "sigue", "falta", "decir", "pasa", "ve", "esperamos", "queda", "tenia", "visita", "parece", "vas", "sabe", "llega", "dio", "debe", "gusta", "recuerdo", "sale", "puedo", "come", "dar", "perdio", "retiro", "mira", "vive", "llego", "hizo", "gana", "sabes", "espera", "vivir", "esperando", "veo", "vale", "saber", "pueden", "llama", "puedes", "dicen", "haciendo", "estara", "quieres", "dormir", "llegar", "une", "viendo", "tratar",
-                    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
-                    "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
-                    "u", "v", "w", "x", "q", "z",
-                    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", 
-                    "00", "01", "06", "000",
-                    "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
-                    "20", "21", "22", "23", "25", "29",
-                    "30", "40", "45", "50", "100", 
-                    "て", "の", "い", "か", "た", "し", "な", "っ", "の", "と", "す", "ん", "は", "る", "う", "ま", "に", "ら", "お", "こ", "り", "よ", "さ", "く", "き", "あ", "も", "れ", "け", "や", "ち"
-                ],
-                "size": "400"
-            }
-        }
-    }
-};
-
-var shinglesQuery = {
-    "size": "1000",
-    "query": {
-        "match_all": {}
-    },
-    "facets": {
-        "blah": {
-            "terms": {
-                "field": "text.shingles",
-                "size": "400"
-                /*"script": {
-                    "script": "term.match(new RegExp(regex, 'i')) ? false : true",
-                    "lang": "js",
-                    "params": {
-                        "regex": "(.)(1|2|3|a|en|yo|tu|ti|tus|ellos|nos|su|sus|por|en|de|del|el|le|la|lo|las|los|les|con|no|y|t|que|me|para|da|san|mi|un|una|te|es|esa|ese|esos|esta|este|estos|estas|ya|se|como|to|be|the|si|ya)"
-                    }
-                }*/
-            }
-        }
-    }
-};
+var terms_exclude = [
+    "htt", "http", "https", "ca", "co", "com", "amps", "em", "lts3", "xd", "eu",
+    "dias", "yo", "rt", "san", "mas", "si", "via", "vs", "av", "vez", "pa", "toda", "pues", "dice", "despues", "paso", "ahora", "ver", "quiero", "tambien", "gente", "da", "mejor", "todas", "creo", "mismo", "tras", "cerca", "hacia", "cada", "medio", "alguien", "primer", "primera", "aun", "muchas", "vos", "mientras", "alla", "ganas", "nadie", "super", "igual", "camino", "proximo", "ultimo", "veces", "ex", "nombre", "persona", "mejor", "mejores", "servicio", "minuto", "cara", "seria", "km", "ja", "lado", "meses", "puerta", "jaja", "jajaja", "vista", "pasado", "entrada", "casi", "sos", "fecha", "claro", "jajajajaja", "cosas", "pronto", "punto", "mes", "caso", "mil", "minutos", "saludo", "sector", "cuenta", "pais", "buenas", "ayer", "nunca", "hola", "buen", "dos", "buenos", "jajajaja", "bueno", "saludos", "personas", "buena", "unico", "junto", "alto", "bajo", "altura", "mayor", "segun", "mano", "alta", "horas", "tres",
+    "i", "the", "at", "to", "my", "it", "with", "and", "this", "so", "do", "be", "others", "that", "of", "in", "on", "you", "for", "is", "as", "from", "am", "up", "get", "all", "out", "go", "can", "are", "i'm", "we", "by", "have", "just", "will", "your", "but", "was", "one", "not", "if", "show", "now", "time", "what", "today", "haha", "when", "city", "an", "live", "don't", "or", "can't", "back", "it's", "here", "about", "country", "know", "good", "class", "photo",
+    "favor", "ano", "anos", "va", "asi", "hoy", "bien", "aqui", "tan", "momento", "ahi", "aca", "sino", "acabo", "ah", "luego", "more", "day", "june", 
+    "", "lt", "gt", "gts", "na", "pm", "nao", "um", "ta", "pra", "uma", "re", "cc", "mais", "il", "et", "ma", "je", "eh", "sis", "ht", "per", "sa", "amp",
+    "voy", "hacer", "hace", "ser", "di", "estan", "sera", "ir", "vamos", "espero", "tener", "vi", "viene", "quiere", "van", "puede", "dijo", "deja", "sigue", "falta", "decir", "pasa", "ve", "esperamos", "queda", "tenia", "visita", "parece", "vas", "sabe", "llega", "dio", "debe", "gusta", "recuerdo", "sale", "puedo", "come", "dar", "perdio", "retiro", "mira", "vive", "llego", "hizo", "gana", "sabes", "espera", "vivir", "esperando", "veo", "vale", "saber", "pueden", "llama", "puedes", "dicen", "haciendo", "estara", "quieres", "dormir", "llegar", "une", "viendo", "tratar",
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+    "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+    "u", "v", "w", "x", "q", "z",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", 
+    "00", "01", "06", "000",
+    "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
+    "20", "21", "22", "23", "25", "29",
+    "30", "40", "45", "50", "100"
+];
 
 module.exports = function(app) {    
     app.get('*', checkSession);
@@ -93,7 +44,7 @@ module.exports = function(app) {
             everyauth: {}
         });
     });
-
+    
     app.get('/twitter/municipios', function(req, res) {
         redis.hgetall('municipios:location', function(err, data) {
             var locations = Object.keys(data).map(function(muni) {
@@ -114,105 +65,142 @@ module.exports = function(app) {
         });
     });
 
-    app.get('/twitter/terms', query, exclude_terms, terms, getTags, function(req, res) {
-        res.render('terms', {
-            tags: req.tags,
-            session_id: req.session_id,
-            terms: req.terms,
-            exc_inc: 'exclude'
-        });
-    });
 
-    app.get('/twitter/shingles', query, exclude_shingles, shingles, getTags, function(req, res) {
-        res.render('terms', {
-            tags: req.tags,
-            session_id: req.session_id,
-            terms: req.terms,
-            exc_inc: 'exclude'
-        });
-    });
-
-    // GET /twitter/terms/exclude
+    // GET /exclude
     // Show all terms excluded
-    app.get('/twitter/terms/exclude', function(req, res) {
-        redis.smembers('exclude_terms', function(err, data) {
-            res.render('exclude', {
-                session_id: req.session_id,
-                terms: data.sort(),
+    app.get('/twitter/:type/exclude', checkType, function(req, res) {
+        var type = req.params.type;
+        exclude(req, res, function() {
+            render_terms(req, res, {
+                terms: req.exclude.sort().map(function(t) { return { term: t } }),
                 exc_inc: 'include'
-            });
+            }, true);
         });
     });
-    // POST /twitter/terms/exclude
+
+    // POST /exclude
     // Exclude the given term
-    app.post('/twitter/terms/exclude', function(req, res) {
+    app.post('/twitter/:type/exclude', checkType, function(req, res) {
         var term = req.body.term;
-        redis.sadd('exclude_terms', term, query);
+        var type = req.params.type;
+        redis.sadd('exclude_'+type, term, query);
 
-        function query() {
-            termsWithTags(req, res, function() {
-                res.render('includes/terms', {
-                    terms: req.terms,
-                    tags: req.tags,
-                    exc_inc: 'exclude'
-                });
+        function query(re) {
+            exclude(req, res, function() {
+                query(req, res, function() {
+                    render_terms('includes/terms', {
+                        terms: req.terms,
+                        exc_inc: 'include'
+                    });
+                });                
             });
         }
     });
 
-    // GET /twitter/shingles/exclude
-    // Show all shingles excluded
-    app.get('/twitter/shingles/exclude', function(req, res) {
-        redis.smembers('exclude_shingles', function(err, data) {
-            res.render('terms', {
-                terms: data.sort().map(function(t) { return { term: t } }),
-                exc_inc: 'include'
-            });
-        });
-    });
-    // POST /twitter/shingles/exclude
-    // Exclude the given shingle
-    app.post('/twitter/shingles/exclude', function(req, res) {
+    // DELETE /exclude
+    // Delete term from exclude list
+    app.del('/twitter/:type/exclude', checkType, function(req, res) {
         var term = req.body.term;
-        redis.sadd('exclude_shingles', term, query);
+        var type = req.params.type;
+        redis.del('exclude_'+type, term, query);
 
         function query() {
-            shinglesWithTags(req, res, function() {
-                res.render('includes/terms', {
-                    tags: req.tags,
-                    terms: req.terms,
-                    exc_inc: 'exclude'
-                });
-            });                
-        }
-    });
-
-    // DELETE /twitter/shingles/exclude
-    // Delete shingle from exclude listings
-    app.del('/twitter/shingles/exclude', function(req, res) {
-        var term = req.body.term;
-        redis.srem('exclude_shingles', term, query);
-
-        function query() {
-            redis.smembers('exclude_shingles', function(err, data) {
-                res.render('includes/terms', {
-                    terms: data.sort().map(function(t) { return { term: t } }),
-                    exc_inc: 'include'
-                });
+            exclude(req, res, function() {
+                render_terms(req, res, { exc_inc: 'include' });
             });
         }
     });
     
-    // GET /twitter/dictionary
+    // GET /dictionary
     app.get('/twitter/dictionary', dictionary, function(req, res) {
-        res.render('terms', {
-            terms: req.terms,
-            exc_inc: 'exclude'
-        });            
+        render_terms(req, res, {}, true);            
+    });
+
+    // GET /terms || /shingles
+    app.get('/twitter/:type', checkType, search, function(req, res) {
+        render_terms(req, res, {}, true);
     });
 
     return this;
-    
+
+    function exclude(req, res, next) {
+        var type = req.params.type;
+        var exclude = type == 'terms' ? exclude_terms : [];
+        redis.smembers('exclude_'+type, function(err, r) {
+            req.exclude = exclude.concat(r);
+            next();
+        });
+    }
+
+    function search(req, res, next) {
+        exclude(req, res, function() {
+            query(req, res, function() {
+                es.search('analysis', 'message', req._query, function(err, data) {
+                    req.terms = JSON.parse(data).facets.blah.terms;
+                    getTags(req, res, next);
+                });
+            });
+        });
+    }
+
+    function query(req, res, next) {
+        var type = req.params.type;
+        var field = "text."+type;
+        
+        req._query = {
+            "query": {
+                "match": {
+                }
+            },
+            "facets": {
+                "blah": {
+                    "terms": {
+                        "field": field,
+                        "exclude": req.exclude,
+                        "size": "400"
+                    }
+                }
+            }
+        };
+
+        if(req.query.q) {
+            req._query.match[field] = {
+                "query": req.query.q,
+                "operator" : "and"
+            };
+        } else {
+            req._query.query= { "match_all": {} }
+        }
+        next();
+    }
+
+    function render_terms(req, res, locals, full) {
+        full = full || false;
+        var tpl = 'terms';
+        var locals = _.defaults(locals, {
+            tags: req.tags||[],
+            session_id: req.session_id,
+            terms: req.terms,
+            exc_inc: 'exclude'
+        });
+        res.render(full ? tpl : 'includes/'+tpl, locals);
+    }
+
+    function checkSession(req, res, next) {
+        if(!req.session.session_id) {
+            req.session.session_id = Date.now();
+        }
+        req.session_id = req.session.session_id;
+        next();
+    }
+
+    function dictionary(req, res, next) {
+        redis.smembers('dictionary', function(err, data) {
+            req.terms = data.sort().map(function(t) { return { term: t } });
+            next();
+        });
+    }
+
     function getTags(req, res, next) {
         var terms = req.terms.map(function(t) {
             return t.term;
@@ -227,86 +215,12 @@ module.exports = function(app) {
             next();
         });
     }
-    
-    function dictionary(req, res, next) {
-        redis.smembers('dictionary', function(err, data) {
-            req.terms = data.sort().map(function(t) { return { term: t } });
-            next();
-        });
-    }
 
-    function exclude_terms(req, res, next) {
-        var exclude = termsQuery.facets.blah.terms.exclude;
-        redis.smembers('exclude_terms', function(err, r) {
-            termsQuery.facets.blah.terms.exclude = exclude.concat(r);
-            next();
-        });
-    }
-
-    function exclude_shingles(req, res, next) {
-        var exclude = []; //= termsQuery.facets.blah.terms.exclude;
-        redis.smembers('exclude_shingles', function(err, r) {
-            shinglesQuery.facets.blah.terms.exclude = exclude.concat(r);
-            next();
-        });
-    }
-
-    function terms(req, res, next) {
-        termsQuery.query = req._query;
-        termsQuery.size = req.query.size || "1000";
-
-        es.search('analysis', 'message', termsQuery, function(err, data) {
-            req.terms = JSON.parse(data).facets.blah.terms;
-            next();
-        });
-    }
-
-    function shingles(req, res, next) {
-        termsQuery.query = req._query;
-        termsQuery.size = req.query.size || "1000";
-        es.search('analysis', 'message', shinglesQuery, function(err, data) {
-            req.terms = JSON.parse(data).facets.blah.terms;
-            next();
-        });
-    }
-
-    function query(req, res, next) {
-        if(req.query.q) {
-            req._query =  {
-                "match": {
-                   "text.terms": {
-                        "query": req.query.q,
-                        "operator" : "and"
-                    }
-                }
-            }
-        } else {
-            req._query = { "match_all": {} }
+    function checkType(req, res, next) {
+        if(!type.match(/^(terms|shingles)$/)) {
+            res.send(404);
+            return;
         }
         next();
-    }
-
-    function checkSession(req, res, next) {
-        if(!req.session.session_id) {
-            req.session.session_id = Date.now();
-        }
-        req.session_id = req.session.session_id;
-        next();
-    }
-    
-    function shinglesWithTags(req, res, next) {
-        exclude_shingles(req, res, function() {
-            shingles(req, res, function() {
-                getTags(req, res, next);
-            })
-        });
-    }
-
-    function termsWithTags(req, res, next) {
-        exclude_terms(req, res, function() {
-            terms(req, res, function() {
-                getTags(req, res, next);
-            });                
-        });
     }
 };

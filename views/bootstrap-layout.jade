@@ -1,0 +1,64 @@
+!!! 5
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='description', content='')
+    meta(name='author', content='')
+
+    link(href='/stylesheets/bootstrap.css', rel='stylesheet')
+    style
+      /* To push content below navbar */
+      @media (min-width: 980px) {
+      body {
+      margin-top: 41px;
+      }
+      }
+      .sidebar-nav {
+      padding: 9px 0;
+      }
+      @media (max-width: 980px) {
+      /* Enable use of floated navbar text */
+      .navbar-text.pull-right {
+      float: none;
+      padding-left: 5px;
+      padding-right: 5px;
+      }
+      }
+    link(href='/stylesheets/bootstrap-responsive.css', rel='stylesheet')
+    block head
+
+  body
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          button.btn.btn-navbar(type='button', data-toggle='collapse', data-target='.nav-collapse')
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.brand(href='#') Terms
+          .nav-collapse.collapse
+            .btn-group.pull-right
+              a.btn.dropdown-toggle(data-toggle="dropdown", href="#")
+                | Action
+                span.caret
+              ul.dropdown-menu
+                li
+                  a(href='#') Terms
+                li
+                  a(href='#') Shingles
+            ul.nav
+              li
+                a(href='#') simon bolivar &nbsp;>
+              li
+                a(href='#about') libertad &nbsp;>
+              li.active
+                a(href='#contact') muerte
+
+    block content
+    script(type="text/javascript", src="/javascripts/thirdparty/jquery/jquery-1.8.min.js")
+    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/tag-it.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/ws-rpc-client.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/bootstrap.js")
+    block javascripts
