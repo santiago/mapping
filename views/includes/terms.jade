@@ -4,14 +4,15 @@ ul.terms
       .pos
         p #{i+1}.&nbsp;
       .term
-        a(href='?q=#{t.term}') #{t.term}
+        a(href='/twitter/#{type}/#!/p=#{encodeURI(t.term)}') #{t.term}
       .count
         p #{t.count}
       .action
         a(href="#{exc_inc}") #{exc_inc}
-      .tags
-        form
-          ul.tagging
-            -if(tags[t.term])
-              each tag in tags[t.term].split(',')
-                li #{tag}
+      -if(tags)
+        .tags
+          form
+            ul.tagging
+              -if(tags[t.term])
+                each tag in tags[t.term].split(',')
+                  li #{tag}

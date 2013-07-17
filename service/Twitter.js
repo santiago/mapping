@@ -1,6 +1,8 @@
 var _ = require('underscore');
 var redis = require('redis').createClient();
 
+var Terms = require('../domain/Terms');
+
 var esclient = (function() {
     var fork = true;
     if(fork) {
@@ -19,16 +21,14 @@ var es = (function() {
     return new (esclient)(opts);
 })();
 
-var terms_exclude = [
+var exclude_terms = [
     "htt", "http", "https", "ca", "co", "com", "amps", "em", "lts3", "xd", "eu",
     "dias", "yo", "rt", "san", "mas", "si", "via", "vs", "av", "vez", "pa", "toda", "pues", "dice", "despues", "paso", "ahora", "ver", "quiero", "tambien", "gente", "da", "mejor", "todas", "creo", "mismo", "tras", "cerca", "hacia", "cada", "medio", "alguien", "primer", "primera", "aun", "muchas", "vos", "mientras", "alla", "ganas", "nadie", "super", "igual", "camino", "proximo", "ultimo", "veces", "ex", "nombre", "persona", "mejor", "mejores", "servicio", "minuto", "cara", "seria", "km", "ja", "lado", "meses", "puerta", "jaja", "jajaja", "vista", "pasado", "entrada", "casi", "sos", "fecha", "claro", "jajajajaja", "cosas", "pronto", "punto", "mes", "caso", "mil", "minutos", "saludo", "sector", "cuenta", "pais", "buenas", "ayer", "nunca", "hola", "buen", "dos", "buenos", "jajajaja", "bueno", "saludos", "personas", "buena", "unico", "junto", "alto", "bajo", "altura", "mayor", "segun", "mano", "alta", "horas", "tres",
     "i", "the", "at", "to", "my", "it", "with", "and", "this", "so", "do", "be", "others", "that", "of", "in", "on", "you", "for", "is", "as", "from", "am", "up", "get", "all", "out", "go", "can", "are", "i'm", "we", "by", "have", "just", "will", "your", "but", "was", "one", "not", "if", "show", "now", "time", "what", "today", "haha", "when", "city", "an", "live", "don't", "or", "can't", "back", "it's", "here", "about", "country", "know", "good", "class", "photo",
     "favor", "ano", "anos", "va", "asi", "hoy", "bien", "aqui", "tan", "momento", "ahi", "aca", "sino", "acabo", "ah", "luego", "more", "day", "june", 
     "", "lt", "gt", "gts", "na", "pm", "nao", "um", "ta", "pra", "uma", "re", "cc", "mais", "il", "et", "ma", "je", "eh", "sis", "ht", "per", "sa", "amp",
     "voy", "hacer", "hace", "ser", "di", "estan", "sera", "ir", "vamos", "espero", "tener", "vi", "viene", "quiere", "van", "puede", "dijo", "deja", "sigue", "falta", "decir", "pasa", "ve", "esperamos", "queda", "tenia", "visita", "parece", "vas", "sabe", "llega", "dio", "debe", "gusta", "recuerdo", "sale", "puedo", "come", "dar", "perdio", "retiro", "mira", "vive", "llego", "hizo", "gana", "sabes", "espera", "vivir", "esperando", "veo", "vale", "saber", "pueden", "llama", "puedes", "dicen", "haciendo", "estara", "quieres", "dormir", "llegar", "une", "viendo", "tratar",
-    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
-    "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
-    "u", "v", "w", "x", "q", "z",
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "q", "z",
     "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", 
     "00", "01", "06", "000",
     "10", "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -36,7 +36,7 @@ var terms_exclude = [
     "30", "40", "45", "50", "100"
 ];
 
-module.exports = function(app) {    
+module.exports = function TwitterService(app) {    
     app.get('*', checkSession);
     
     app.get('/twitter', function(req, res) {
@@ -69,7 +69,6 @@ module.exports = function(app) {
     // GET /exclude
     // Show all terms excluded
     app.get('/twitter/:type/exclude', checkType, function(req, res) {
-        var type = req.params.type;
         exclude(req, res, function() {
             render_terms(req, res, {
                 terms: req.exclude.sort().map(function(t) { return { term: t } }),
@@ -83,16 +82,11 @@ module.exports = function(app) {
     app.post('/twitter/:type/exclude', checkType, function(req, res) {
         var term = req.body.term;
         var type = req.params.type;
-        redis.sadd('exclude_'+type, term, query);
+        redis.sadd('exclude_'+type, term, _search);
 
-        function query(re) {
-            exclude(req, res, function() {
-                query(req, res, function() {
-                    render_terms('includes/terms', {
-                        terms: req.terms,
-                        exc_inc: 'include'
-                    });
-                });                
+        function _search() {
+            search(req, res, function() {
+                render_terms(req, res);
             });
         }
     });
@@ -116,7 +110,12 @@ module.exports = function(app) {
         render_terms(req, res, {}, true);            
     });
 
-    // GET /terms || /shingles
+    // GET /:type/search
+    app.get('/twitter/:type/search', checkType, search, function(req, res) {
+        render_terms(req, res, {});
+    });
+
+    // GET /:type
     app.get('/twitter/:type', checkType, search, function(req, res) {
         render_terms(req, res, {}, true);
     });
@@ -125,9 +124,9 @@ module.exports = function(app) {
 
     function exclude(req, res, next) {
         var type = req.params.type;
-        var exclude = type == 'terms' ? exclude_terms : [];
+        var excluded = type == 'terms' ? exclude_terms : [];
         redis.smembers('exclude_'+type, function(err, r) {
-            req.exclude = exclude.concat(r);
+            req.exclude = excluded.concat(r);
             next();
         });
     }
@@ -146,7 +145,7 @@ module.exports = function(app) {
     function query(req, res, next) {
         var type = req.params.type;
         var field = "text."+type;
-        
+
         req._query = {
             "query": {
                 "match": {
@@ -164,26 +163,31 @@ module.exports = function(app) {
         };
 
         if(req.query.q) {
-            req._query.match[field] = {
-                "query": req.query.q,
+            req._query.query.match[field] = {
+                "query": decodeURI(req.query.q),
                 "operator" : "and"
             };
         } else {
             req._query.query= { "match_all": {} }
         }
+
         next();
     }
 
     function render_terms(req, res, locals, full) {
         full = full || false;
         var tpl = 'terms';
-        var locals = _.defaults(locals, {
-            tags: req.tags||[],
+        var type = req.params.type;
+
+        var _locals = _.defaults(locals || {}, {
+            type: type,
+            tags: req.tags || null,
             session_id: req.session_id,
             terms: req.terms,
             exc_inc: 'exclude'
         });
-        res.render(full ? tpl : 'includes/'+tpl, locals);
+
+        res.render(full ? tpl : 'includes/'+tpl, _locals);
     }
 
     function checkSession(req, res, next) {
@@ -205,6 +209,7 @@ module.exports = function(app) {
         var terms = req.terms.map(function(t) {
             return t.term;
         });
+
         Terms.getTags(terms, function(err, tags) {
             req.tags = {};
             terms.forEach(function(t, i) {
@@ -217,6 +222,7 @@ module.exports = function(app) {
     }
 
     function checkType(req, res, next) {
+        var type = req.params.type;
         if(!type.match(/^(terms|shingles)$/)) {
             res.send(404);
             return;

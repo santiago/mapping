@@ -1,4 +1,51 @@
 $(function() {
+    function TermsBrowser() {
+        this.renderPath();        
+    }
+    
+    TermsBrowser.prototype.renderPath = function() {
+        this.readPath();
+
+        var path = this.path[0];
+
+        if(path) {
+            var $li = $('<li class="active"><a href="#">'+path+'</a></li>');
+            // $li.append('<span>&nbsp;>&nbsp;</span>');
+            
+            $('ul.nav').empty().append($li);
+        }
+    };
+
+    TermsBrowser.prototype.readPath = function() {
+        this.path = [];
+        
+        var hash = location.hash.replace(/#!\//, '');
+        var query = decodeURI(hash).split('=');
+        var params = {};
+        while(query.length) {
+            var p = query.shift();
+            params[p] = query.shift();
+        }
+        
+        if(params.p) {
+            this.path = params.p.split(',').map(function(t) { return t.trim() });
+        }
+    };
+
+    TermsBrowser.prototype.search = function() {
+        var type = location.pathname.split('/')[2];
+        var q = encodeURI(this.path.join(' '));
+
+        $.get('/twitter/'+type+'/search', { q: q }, function(data) {
+            console.log(data);
+            $('ul.terms').replaceWith(data);
+            clickExclude();
+            this.renderPath();
+        }.bind(this));
+    };
+    
+    var termsBrowser = new TermsBrowser();
+
     var session_id = $('meta[name=session_id]').attr('value');
     var WebSocketRPC = InitWebSocketRPC(WebSocket);
     var ws = new WebSocketRPC('ws://' + window.location.host+'/');
@@ -13,13 +60,6 @@ $(function() {
 
     // Prepare click on 'exclude' link
     clickExclude();
-
-    var path = (function() {
-        location.search.split('&')
-            .filter(function(q) {
-                return q;
-            });
-    })();
 
     // Click to exclude term
     function clickExclude() {
@@ -60,31 +100,19 @@ $(function() {
             }
         });        
     }
-    
-    function TermsBrowser() {
-        this.path = [];
-        
-        var hash = location.hash.replace(/#/, '');
-        var query = decodeURI(hash).split('=');
-        var params = {};
-        while(query.length) {
-            var p = query.shift();
-            params[p] = query.shift();
+
+
+    // Backbone Router for this component
+    var Router = new (Backbone.Router.extend({
+        routes: {
+            "!/:search": "search"
+        },
+
+        search: function(q) {
+            termsBrowser.path = q.split('=').slice(1);
+            termsBrowser.search();
         }
-        
-        if(params.p) {
-            this.path = params.p.split(',').map(function(t) { return t.trim() });
-        }
-        
-        this.search();
-    }
-    
-    TermsBrowser.prototype.search = function() {
-        $.get('/twitter/terms/search', { q: this.path.join(' ') }, function(data) {
-            $('ul.terms').replaceWith(data);
-            clickExclude();
-        });
-    }
-    
-    var termsBrowser = new TermsBrowser();
+    }))();
+
+    Backbone.history.start();
 });

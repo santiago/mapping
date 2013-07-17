@@ -36,7 +36,7 @@ html(lang='en')
             span.icon-bar
             span.icon-bar
             span.icon-bar
-          a.brand(href='#') Terms
+          a.brand(href='/twitter/#{type}') Terms
           .nav-collapse.collapse
             .btn-group.pull-right
               a.btn.dropdown-toggle(data-toggle="dropdown", href="#")
@@ -49,11 +49,7 @@ html(lang='en')
                   a(href='#') Shingles
             ul.nav
               li
-                a(href='#') simon bolivar &nbsp;>
-              li
-                a(href='#about') libertad &nbsp;>
-              li.active
-                a(href='#contact') muerte
+                a(href='#') &nbsp;
 
     block content
     script(type="text/javascript", src="/javascripts/thirdparty/jquery/jquery-1.8.min.js")
@@ -61,4 +57,6 @@ html(lang='en')
     script(type="text/javascript", src="/javascripts/thirdparty/tag-it.min.js")
     script(type="text/javascript", src="/javascripts/thirdparty/ws-rpc-client.js")
     script(type="text/javascript", src="/javascripts/thirdparty/bootstrap.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/underscore.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/backbone.min.js")
     block javascripts
