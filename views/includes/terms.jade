@@ -4,11 +4,15 @@ ul.terms
       .pos
         p #{i+1}.&nbsp;
       .term
-        a(href='/twitter/#{type}/#!/p=#{encodeURI(t.term)}') #{t.term}
+        -if(type)
+          a(href='/twitter/#{type}/#!/p=#{encodeURI(t.term)}') #{t.term}
+        -else
+          a(href='#') #{t.term}
       .count
         p #{t.count}
       .action
-        a(href="#{exc_inc}") #{exc_inc}
+        -each a in actions
+          a(href="##{a}") #{a}
       -if(tags)
         .tags
           form

@@ -1,0 +1,19 @@
+extends bootstrap-layout
+
+block head 
+  meta(name='session_id', value='#{session_id}')
+  link(rel= 'stylesheet', href= '/stylesheets/css3.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/twitter.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/stylesheets/jquery.jgrowl.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/stylesheets/jquery.tagit.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/stylesheets/tagit.ui-zendesk.css', type= 'text/css')
+  title cooperaciones
+
+block content
+  #main.wrapper
+    include includes/terms
+
+block javascripts
+  script(src="http://d3js.org/d3.v3.js")
+
+  script(type="text/javascript", src="/javascripts/stream.js")

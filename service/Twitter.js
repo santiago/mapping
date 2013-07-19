@@ -3,6 +3,39 @@ var redis = require('redis').createClient();
 
 var Terms = require('../domain/Terms');
 
+var Twitter = (function() {
+    var ntwitter = require('ntwitter');
+
+    function TwitterAPI() {
+        console.log(require('../twitter/account'));
+        this.api = new ntwitter(require('../twitter/account'));
+    }
+    
+    TwitterAPI.prototype.follow = function(user, cb) {
+        this.api.createFriendship(user, function(err, data) {
+            if(!err) {
+                es.index('twitter', 'user', data, function() {
+                    
+                });
+                redis.hmset('stream:following:'+user, {
+                    name: data.name,
+                    time_zone: data.time_zone,
+                    profile_image_url: data.profile_image_url,
+                    followers_count: data.followers_count,
+                    description: data.description,
+                    id_str: data.id_str,
+                    location: data.location
+                });
+                cb(true);
+            } else {
+                cb(false);
+            }
+        });
+    };
+
+    return new TwitterAPI();
+})();
+
 var esclient = (function() {
     var fork = true;
     if(fork) {
@@ -72,7 +105,7 @@ module.exports = function TwitterService(app) {
         exclude(req, res, function() {
             render_terms(req, res, {
                 terms: req.exclude.sort().map(function(t) { return { term: t } }),
-                exc_inc: 'include'
+                actions: ['include']
             }, true);
         });
     });
@@ -100,7 +133,7 @@ module.exports = function TwitterService(app) {
 
         function query() {
             exclude(req, res, function() {
-                render_terms(req, res, { exc_inc: 'include' });
+                render_terms(req, res, { actions: ['include'] });
             });
         }
     });
@@ -115,11 +148,21 @@ module.exports = function TwitterService(app) {
         render_terms(req, res, {});
     });
 
+    // GET /stream
+    app.get('/twitter/stream', stream, function(req, res) {
+        render_stream(req, res, { }, true);
+    });
+    
+    // GET /stream/follow
+    app.post('/twitter/stream/follow', follow, function(req, res) {
+        res.send({ ok: true });
+    });
+    
     // GET /:type
     app.get('/twitter/:type', checkType, search, function(req, res) {
         render_terms(req, res, {}, true);
     });
-
+    
     return this;
 
     function exclude(req, res, next) {
@@ -134,7 +177,7 @@ module.exports = function TwitterService(app) {
     function search(req, res, next) {
         exclude(req, res, function() {
             query(req, res, function() {
-                es.search('analysis', 'message', req._query, function(err, data) {
+                es.search('geo', 'message', req._query, function(err, data) {
                     req.terms = JSON.parse(data).facets.blah.terms;
                     getTags(req, res, next);
                 });
@@ -184,10 +227,22 @@ module.exports = function TwitterService(app) {
             tags: req.tags || null,
             session_id: req.session_id,
             terms: req.terms,
-            exc_inc: 'exclude'
+            actions: ['exclude']
         });
 
         res.render(full ? tpl : 'includes/'+tpl, _locals);
+    }
+
+    function render_stream(req, res, locals) {
+        var _locals = _.defaults(locals || {}, {
+            type: null,
+            tags: req.tags || null,
+            session_id: req.session_id,
+            terms: req.terms,
+            actions: ['follow']
+        });
+        
+        res.render('stream', _locals);
     }
 
     function checkSession(req, res, next) {
@@ -199,9 +254,23 @@ module.exports = function TwitterService(app) {
     }
 
     function dictionary(req, res, next) {
-        redis.smembers('dictionary', function(err, data) {
-            req.terms = data.sort().map(function(t) { return { term: t } });
-            next();
+        var query = {
+            "query": {
+                "match_all": {}
+            },
+            "facets": {
+                "dictionary": {
+                    "terms": {
+                        "field": "term",
+                        "size": "7000"
+                    },
+                }                
+            }
+        };
+
+        es.search('analysis', 'message', query, function(err, data) {
+            req.terms = JSON.parse(data).facets.dictionary.terms;
+            render_terms(req, res, {}, true);
         });
     }
 
@@ -217,6 +286,33 @@ module.exports = function TwitterService(app) {
                     req.tags[t] = tags[i];
                 }
             });
+            next();
+        });
+    }
+    
+    function stream(req, res, next) {
+        var query = {
+            "query": {
+                "match_all": {}
+            },
+            "facets": {
+                "mentions": {
+                    "terms": {
+                        "field": "entities.user_mentions.screen_name",
+                        "size": "1000"
+                    }
+                }
+            }
+        };
+        
+        es.search('twitter', 'tweet', query, function(err, data) {
+            req.terms = JSON.parse(data).facets.mentions.terms;
+            next();
+        });
+    }
+
+    function follow(req, res, next) {
+        Twitter.follow(req.body.user, function() {
             next();
         });
     }
