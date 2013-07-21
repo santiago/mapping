@@ -1,0 +1,8 @@
+-each a in actions
+  -if(a == 'follow')
+    -if(following.indexOf(t.term) > -1)
+      a(href="#unfollow") unfollow
+    -else
+      a(href="#follow") follow
+  -else
+    a(href="##{a}") #{a}

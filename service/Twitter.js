@@ -6,31 +6,62 @@ var Terms = require('../domain/Terms');
 var Twitter = (function() {
     var ntwitter = require('ntwitter');
 
+    function addFollowing(data, cb) {
+        if(_.isArray(data)) {
+            var users = data;
+        } else {
+            var users = [data];
+        }
+
+        users.forEach(function(user) {
+            var profile = _.pick(user, ['screen_name', 'name', 'time_zone', 'profile_image_url', 'followers_count', 'description', 'id_str', 'location']);
+            redis.hmset('stream:following:'+user.id_str, profile, function() {
+                redis.hset('stream:following:users', user.id_str, user.screen_name, cb);
+            });
+        });
+    }
+    
     function TwitterAPI() {
         console.log(require('../twitter/account'));
         this.api = new ntwitter(require('../twitter/account'));
     }
-    
+
     TwitterAPI.prototype.follow = function(user, cb) {
         this.api.createFriendship(user, function(err, data) {
             if(!err) {
                 es.index('twitter', 'user', data, function() {
                     
                 });
-                redis.hmset('stream:following:'+user, {
-                    name: data.name,
-                    time_zone: data.time_zone,
-                    profile_image_url: data.profile_image_url,
-                    followers_count: data.followers_count,
-                    description: data.description,
-                    id_str: data.id_str,
-                    location: data.location
+                addFollowing(data, function() {
+                    cb(true);
                 });
-                cb(true);
             } else {
+                console.log(err);
                 cb(false);
             }
         });
+    };
+    
+    // Syncs friends in twitter with our internal listing
+    TwitterAPI.prototype.syncFollowing = function(user, cb) {
+        var api = this.api;
+
+        this.api.getFriendsIds(user, function(err, data) {
+            usersLookup(data);
+        });
+        
+        function usersLookup(ids) {
+            var lookupIds = ids.splice(0, 100);
+            api.lookupUsers(lookupIds, function(err, data) {
+                addFollowing(data, function() {
+                    if(ids.length) {
+                        usersLookup(ids);
+                    } else {
+                        cb(data);
+                    }
+                });
+            });
+        }
     };
 
     return new TwitterAPI();
@@ -149,11 +180,27 @@ module.exports = function TwitterService(app) {
     });
 
     // GET /stream
-    app.get('/twitter/stream', stream, function(req, res) {
-        render_stream(req, res, { }, true);
+    app.get('/twitter/stream', stream, following, function(req, res) {
+        var following = req.following.map(function(t) { return t.toLowerCase() });
+        render_stream(req, res, { following: following }, true);
     });
     
-    // GET /stream/follow
+    // GET /stream/following
+    app.get('/twitter/stream/following', following, users, function(req, res) {
+        res.render('includes/following', { 
+            users: req.users,
+            type: null,
+            tags: req.tags || null,
+            session_id: req.session_id
+        });
+    });
+    
+    // GET /stream/following/sync
+    app.get('/twitter/stream/following/sync', syncFollowing, function(req, res) {
+        res.send({ ok: true });
+    });
+
+    // POST /stream/follow
     app.post('/twitter/stream/follow', follow, function(req, res) {
         res.send({ ok: true });
     });
@@ -241,7 +288,6 @@ module.exports = function TwitterService(app) {
             terms: req.terms,
             actions: ['follow']
         });
-        
         res.render('stream', _locals);
     }
 
@@ -290,6 +336,37 @@ module.exports = function TwitterService(app) {
         });
     }
     
+    function following(req, res, next) {
+        redis.hvals('stream:following:users', function(err, data) {
+            req.following = data;
+            next();
+        });
+    }
+    
+    function users(req, res, next) {
+        redis.hkeys('stream:following:users', function(err, data) {
+            req.users = [];
+            getNextUser();
+            function getNextUser() {
+                var id = data.shift();
+                if(!id) {
+                    next();
+                    return;
+                }
+                redis.hgetall('stream:following:'+id, function(err, user) {
+                    req.users.push(user);
+                    getNextUser();
+                });
+            }
+        })
+    }
+
+    function syncFollowing(req, res, next) {
+        Twitter.syncFollowing('AnalizaColombia', function(list) {
+            next();
+        });
+    }
+
     function stream(req, res, next) {
         var query = {
             "query": {
@@ -311,6 +388,7 @@ module.exports = function TwitterService(app) {
         });
     }
 
+    // Creates a friendship
     function follow(req, res, next) {
         Twitter.follow(req.body.user, function() {
             next();

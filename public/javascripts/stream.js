@@ -10,4 +10,14 @@ $(function() {
             });
         }
     });
+    
+    $('#stream-nav a').click(function(e) {
+        e.preventDefault();
+        var $clicked = $(this);
+        var section = $(this).attr('href').replace(/#/, '');
+        $.get('/twitter/stream/'+section, function(data) {
+            $('.tab-content #'+section).html(data);
+            $clicked.tab('show');
+        });
+    });
 });

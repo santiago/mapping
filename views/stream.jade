@@ -11,7 +11,20 @@ block head
 
 block content
   #main.wrapper
-    include includes/terms
+    ul#stream-nav.nav.nav-tabs
+      li.active
+        a(href='#trending') Trending
+      li
+        a(href='#following') Following
+      li
+        a(href='#analysis') Analysis
+    
+    .tab-content
+      #trending.tab-pane.active
+        include includes/terms
+      #following.tab-pane
+      #analysis.tab-pane
+        // include includes/following
 
 block javascripts
   script(src="http://d3js.org/d3.v3.js")

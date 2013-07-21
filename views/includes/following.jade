@@ -1,0 +1,17 @@
+ul.following
+  each user, i in users
+    li.following-item
+      .profile-image
+        span 
+          img(src="#{user.profile_image_url}")
+      .user
+        a(href='#') #{user.screen_name}
+      .action
+        a(href="#") unfollow
+      -if(tags)
+        .tags
+          form
+            ul.tagging
+              -if(tags[user.screen_name])
+                each tag in tags[user.screen_name].split(',')
+                  li #{tag}

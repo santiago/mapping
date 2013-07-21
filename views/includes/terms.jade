@@ -11,8 +11,7 @@ ul.terms
       .count
         p #{t.count}
       .action
-        -each a in actions
-          a(href="##{a}") #{a}
+        include actions
       -if(tags)
         .tags
           form
