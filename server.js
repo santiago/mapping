@@ -107,6 +107,31 @@ app.services = {};
 
 // require('./lib/Upload')
 
+// Connect to ElasticSearch and export
+var esclient = (function() {
+    var fork = true;
+    if(fork) {
+        return require('/Projects/node-elasticsearch-client');
+    }
+    return require('elasticsearchclient');
+})();
+
+// Initialize ES
+app.es = (function() {
+    var opts = {
+        host: 'localhost',
+        port: 9200
+    };
+
+    return new (esclient)(opts);
+})();
+
+// Connect to redis and export
+app.redis = require('redis').createClient();
+
+// Initialize Twitter API and export
+app.Twitter = require('./domain/Twitter');
+
 // Only listen on $ node app.js
 if (!module.parent) {
     var port = 6660;

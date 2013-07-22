@@ -1,89 +1,13 @@
-var _ = require('underscore');
-var redis = require('redis').createClient();
+var app = module.parent,
+    redis = app.redis,
+    es = app.es,
+    _ = require('underscore');
 
+// Domain
 var Terms = require('../domain/Terms');
 
-var Twitter = (function() {
-    var ntwitter = require('ntwitter');
-
-    function addFollowing(data, cb) {
-        if(_.isArray(data)) {
-            var users = data;
-        } else {
-            var users = [data];
-        }
-
-        users.forEach(function(user) {
-            var profile = _.pick(user, ['screen_name', 'name', 'time_zone', 'profile_image_url', 'followers_count', 'description', 'id_str', 'location']);
-            redis.hmset('stream:following:'+user.id_str, profile, function() {
-                redis.hset('stream:following:users', user.id_str, user.screen_name, cb);
-            });
-        });
-    }
-    
-    function TwitterAPI() {
-        console.log(require('../twitter/account'));
-        this.api = new ntwitter(require('../twitter/account'));
-    }
-
-    TwitterAPI.prototype.follow = function(user, cb) {
-        this.api.createFriendship(user, function(err, data) {
-            if(!err) {
-                es.index('twitter', 'user', data, function() {
-                    
-                });
-                addFollowing(data, function() {
-                    cb(true);
-                });
-            } else {
-                console.log(err);
-                cb(false);
-            }
-        });
-    };
-    
-    // Syncs friends in twitter with our internal listing
-    TwitterAPI.prototype.syncFollowing = function(user, cb) {
-        var api = this.api;
-
-        this.api.getFriendsIds(user, function(err, data) {
-            usersLookup(data);
-        });
-        
-        function usersLookup(ids) {
-            var lookupIds = ids.splice(0, 100);
-            api.lookupUsers(lookupIds, function(err, data) {
-                addFollowing(data, function() {
-                    if(ids.length) {
-                        usersLookup(ids);
-                    } else {
-                        cb(data);
-                    }
-                });
-            });
-        }
-    };
-
-    return new TwitterAPI();
-})();
-
-var esclient = (function() {
-    var fork = true;
-    if(fork) {
-        return require('/Projects/node-elasticsearch-client');
-    }
-    return require('elasticsearchclient');
-})();
-
-// Initialize ES
-var es = (function() {
-    var opts = {
-        host: 'localhost',
-        port: 9200
-    };
-
-    return new (esclient)(opts);
-})();
+// Service helpers
+var stream = require('./stream_helpers');
 
 var exclude_terms = [
     "htt", "http", "https", "ca", "co", "com", "amps", "em", "lts3", "xd", "eu",
@@ -180,13 +104,33 @@ module.exports = function TwitterService(app) {
     });
 
     // GET /stream
-    app.get('/twitter/stream', stream, following, function(req, res) {
-        var following = req.following.map(function(t) { return t.toLowerCase() });
+    app.get('/twitter/stream', stream.following, function(req, res) {
         render_stream(req, res, { following: following }, true);
     });
     
+    // GET /stream/trending
+    app.get('/twitter/stream/trending', stream.trending, function(req, res) {
+        res.render('includes/terms', { 
+            users: req.users,
+            type: null,
+            tags: req.tags || null,
+            following: req.following.map(function(t) { return t.toLowerCase() }),
+            session_id: req.session_id
+        });
+    });
+    
+    // GET /stream/analysis
+    app.get('/twitter/stream/analysis', stream.analysis, stream.users, getTags, function(req, res) {
+        res.render('includes/following', { 
+            users: req.users,
+            type: null,
+            tags: req.tags || null,
+            session_id: req.session_id
+        });
+    });
+    
     // GET /stream/following
-    app.get('/twitter/stream/following', following, users, function(req, res) {
+    app.get('/twitter/stream/following', stream.following, stream.users, getTags, function(req, res) {
         res.render('includes/following', { 
             users: req.users,
             type: null,
@@ -196,12 +140,12 @@ module.exports = function TwitterService(app) {
     });
     
     // GET /stream/following/sync
-    app.get('/twitter/stream/following/sync', syncFollowing, function(req, res) {
+    app.get('/twitter/stream/following/sync', stream.syncFollowing, function(req, res) {
         res.send({ ok: true });
     });
 
     // POST /stream/follow
-    app.post('/twitter/stream/follow', follow, function(req, res) {
+    app.post('/twitter/stream/follow', stream.follow, function(req, res) {
         res.send({ ok: true });
     });
     
@@ -332,65 +276,6 @@ module.exports = function TwitterService(app) {
                     req.tags[t] = tags[i];
                 }
             });
-            next();
-        });
-    }
-    
-    function following(req, res, next) {
-        redis.hvals('stream:following:users', function(err, data) {
-            req.following = data;
-            next();
-        });
-    }
-    
-    function users(req, res, next) {
-        redis.hkeys('stream:following:users', function(err, data) {
-            req.users = [];
-            getNextUser();
-            function getNextUser() {
-                var id = data.shift();
-                if(!id) {
-                    next();
-                    return;
-                }
-                redis.hgetall('stream:following:'+id, function(err, user) {
-                    req.users.push(user);
-                    getNextUser();
-                });
-            }
-        })
-    }
-
-    function syncFollowing(req, res, next) {
-        Twitter.syncFollowing('AnalizaColombia', function(list) {
-            next();
-        });
-    }
-
-    function stream(req, res, next) {
-        var query = {
-            "query": {
-                "match_all": {}
-            },
-            "facets": {
-                "mentions": {
-                    "terms": {
-                        "field": "entities.user_mentions.screen_name",
-                        "size": "1000"
-                    }
-                }
-            }
-        };
-        
-        es.search('twitter', 'tweet', query, function(err, data) {
-            req.terms = JSON.parse(data).facets.mentions.terms;
-            next();
-        });
-    }
-
-    // Creates a friendship
-    function follow(req, res, next) {
-        Twitter.follow(req.body.user, function() {
             next();
         });
     }

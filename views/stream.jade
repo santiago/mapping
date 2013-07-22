@@ -18,15 +18,11 @@ block content
         a(href='#following') Following
       li
         a(href='#analysis') Analysis
-    
+
     .tab-content
       #trending.tab-pane.active
-        include includes/terms
       #following.tab-pane
       #analysis.tab-pane
-        // include includes/following
 
 block javascripts
-  script(src="http://d3js.org/d3.v3.js")
-
   script(type="text/javascript", src="/javascripts/stream.js")

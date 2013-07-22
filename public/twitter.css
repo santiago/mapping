@@ -9,9 +9,11 @@ li.term-item .pos{width:45px}
 li.term-item .term{width:200px}
 li.term-item .count{width:70px}
 li.term-item .action{width:50px;font-size:12px;margin-right:10px}
-li.following-item{float:left;clear:left;margin-bottom:10px;width:100%;border-bottom:1px solid #ddd;padding-bottom:10px;}
+li.following-item{float:left;clear:left;width:100%;border-bottom:1px solid #ddd;padding-top:10px;padding-bottom:10px;}
 li.following-item .profile-image,li.following-item .user,li.following-item .action{float:left}
 li.following-item .profile-image{width:48px}
 li.following-item .user{width:200px;margin-left:10px}
 li.following-item .action{width:50px;font-size:12px;margin-right:10px}
+.stream-actions{padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #ddd}
+#stream-nav{margin-bottom:10px}
 .tagging.ui-widget{font-size:11px}
