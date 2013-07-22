@@ -1,7 +1,26 @@
-var app = module.parent,
-    redis = app.redis,
-    es = app.es,
-    _ = require('underscore');
+// Connect to ElasticSearch and export
+var esclient = (function() {
+    var fork = true;
+    if(fork) {
+        return require('/Projects/node-elasticsearch-client');
+    }
+    return require('elasticsearchclient');
+})();
+
+// Initialize ES
+var es = (function() {
+    var opts = {
+        host: 'localhost',
+        port: 9200
+    };
+
+    return new (esclient)(opts);
+})();
+
+// Connect to redis and export
+var redis = require('redis').createClient();
+
+var _ = require('underscore');
 
 module.exports = (function() {
     var ntwitter = require('ntwitter');

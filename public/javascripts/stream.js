@@ -8,24 +8,14 @@ $(function() {
         ws.message('session_id', session_id);
     });
 
-    // Click on main tabs    
-//    $('#stream-nav a').click(function(e) {
-//        e.preventDefault();
-//        var $clicked = $(this);
-//        var section = $(this).attr('href').replace(/#/, '');
-//        $.get('/twitter/stream/'+section, function(data) {
-//            $('.tab-content #'+section).html(data);
-//            prepareTags();
-//            $clicked.tab('show');
-//        });
-//    });
-
     function prepareTags() {
         $("ul.tagging").tagit({
             beforeTagAdded: function(evt, ui) {
                 if (!ui.duringInitialization) {
-                    var term = $(this).closest('li').find('.term').text().trim().toLowerCase();
+                    var term = $(this).closest('li').find('.user').text().trim().toLowerCase();
                     var tag = $(ui.tag).find('[name=tags]').val().trim().replace(/\s/, '-');
+                    console.log(term);
+                    console.log(tag);
                     ws.message('add_tags', term, tag);
                 }
             },
@@ -47,31 +37,25 @@ $(function() {
         },
 
         trending: function(q) {
-            goTo('trending', function() {
-                trending();
-            });
+            goTo('trending', trending);
         },
         
         following: function(q) {
-            goTo('following', function() {
-                following();
-            });
+            goTo('following', following);
         },
         
         analysis: function(q) {
-            goTo('analysis', function() {
-                analysis();
-            });
+            goTo('analysis', analysis);
         }
     }))();
 
     Backbone.history.start();
-    
+
     function trending() {
         // Click on actions: follow, unfollow
         $('.action a').click(function(e) {
             e.preventDefault();
-            
+
             var user = $(this).closest('.term-item').find('.term a').text();
             var action = $(this).attr('href');
             if(action == '#follow') {
@@ -81,14 +65,14 @@ $(function() {
             }
         });
     }
-    
+
     function following() {
         $('#sync').click(function(e) {
             e.preventDefault();
             console.log('sync');
         });
     }
-    
+
     function analysis() {
     }
 
@@ -96,7 +80,8 @@ $(function() {
         $.get('/twitter/stream/'+section, function(data) {
             $('.tab-content #'+section).html(data);
             prepareTags();
-            $('a[href="#"'+section+']').tab('show');
+            $('a[href="#'+section+'"]').tab('show');
+            cb();
         });        
     }
 });

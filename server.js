@@ -93,20 +93,6 @@ app.get('/javascripts/compiled_tpls.js', function(req, res) {
     res.send(templates);
 });
 
-// Start Services
-app.services = {};
-['Mapping', 'Twitter'].forEach(function(name) {
-    var services = require('./service/'+name);
-    if (!(services instanceof Array)) {
-        services = [services]
-    }
-    services.forEach(function(s) {
-        app.services[name] = s(app);
-    });
-});
-
-// require('./lib/Upload')
-
 // Connect to ElasticSearch and export
 var esclient = (function() {
     var fork = true;
@@ -131,6 +117,20 @@ app.redis = require('redis').createClient();
 
 // Initialize Twitter API and export
 app.Twitter = require('./domain/Twitter');
+
+// Start Services
+app.services = {};
+['Mapping', 'Twitter'].forEach(function(name) {
+    var services = require('./service/'+name);
+    if (!(services instanceof Array)) {
+        services = [services]
+    }
+    services.forEach(function(s) {
+        app.services[name] = s(app);
+    });
+});
+
+// require('./lib/Upload')
 
 // Only listen on $ node app.js
 if (!module.parent) {
