@@ -14,8 +14,6 @@ $(function() {
                 if (!ui.duringInitialization) {
                     var term = $(this).closest('li').find('.user').text().trim().toLowerCase();
                     var tag = $(ui.tag).find('[name=tags]').val().trim().replace(/\s/, '-');
-                    console.log(term);
-                    console.log(tag);
                     ws.message('add_tags', term, tag);
                 }
             },
@@ -69,7 +67,12 @@ $(function() {
     function following() {
         $('#sync').click(function(e) {
             e.preventDefault();
-            console.log('sync');
+            $(this).attr('disabled', '');
+            $(this).removeClass('btn-primary');
+            $(this).text('Synching ...');
+            $.post('/twitter/stream/sync', function() {
+                goTo('following', following);
+            });
         });
     }
 

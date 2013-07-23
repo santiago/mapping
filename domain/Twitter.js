@@ -35,9 +35,13 @@ module.exports = (function() {
         users.forEach(function(user) {
             var profile = _.pick(user, ['screen_name', 'name', 'time_zone', 'profile_image_url', 'followers_count', 'description', 'id_str', 'location']);
             redis.hmset('stream:following:'+user.id_str, profile, function() {
-                redis.hset('stream:following:users', user.id_str, user.screen_name, cb);
+                redis.hset('stream:following:users', user.id_str, user.screen_name, function() {
+                    
+                });
             });
         });
+        
+        cb();
     }
     
     function TwitterAPI() {
@@ -73,6 +77,7 @@ module.exports = (function() {
             var lookupIds = ids.splice(0, 100);
             api.lookupUsers(lookupIds, function(err, data) {
                 addFollowing(data, function() {
+                    console.log(ids);
                     if(ids.length) {
                         usersLookup(ids);
                     } else {

@@ -114,8 +114,8 @@ module.exports = function TwitterService(app) {
         });
     });
     
-    // GET /stream/following/sync
-    app.get('/twitter/stream/following/sync', stream.syncFollowing, function(req, res) {
+    // POST /stream/following/sync
+    app.post('/twitter/stream/sync', stream.syncFollowing, function(req, res) {
         res.send({ ok: true });
     });
 
