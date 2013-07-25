@@ -5,7 +5,7 @@ module.exports = function TwitterService(app) {
     
     // Domain
     var Terms = require('../domain/Terms');
-    var exclude_terms = Terms.exclude_terms;
+    var Analysis = new (require('../domain/Analysis'))('geo', 'message');
     
     // Service helpers
     var stream = require('./stream_helpers')(app);
@@ -41,8 +41,9 @@ module.exports = function TwitterService(app) {
 
     // GET /exclude
     // Show all terms excluded
-    app.get('/twitter/:type/exclude', checkType, function(req, res) {
-        exclude(req, res, function() {
+    app.get('/twitter/:mode/exclude', checkMode, function(req, res) {
+        var mode = req.params.mode;
+        Terms.getExclude(mode, function() {
             render_terms(req, res, {
                 terms: req.exclude.sort().map(function(t) { return { term: t } }),
                 actions: ['include']
@@ -52,10 +53,10 @@ module.exports = function TwitterService(app) {
 
     // POST /exclude
     // Exclude the given term
-    app.post('/twitter/:type/exclude', checkType, function(req, res) {
+    app.post('/twitter/:mode/exclude', checkMode, function(req, res) {
         var term = req.body.term;
-        var type = req.params.type;
-        redis.sadd('exclude_'+type, term, _search);
+        var mode = req.params.mode;
+        redis.sadd('exclude_'+mode, term, _search);
 
         function _search() {
             search(req, res, function() {
@@ -66,16 +67,12 @@ module.exports = function TwitterService(app) {
 
     // DELETE /exclude
     // Delete term from exclude list
-    app.del('/twitter/:type/exclude', checkType, function(req, res) {
+    app.del('/twitter/:mode/exclude', checkMode, function(req, res) {
         var term = req.body.term;
-        var type = req.params.type;
-        redis.del('exclude_'+type, term, query);
-
-        function query() {
-            exclude(req, res, function() {
-                render_terms(req, res, { actions: ['include'] });
-            });
-        }
+        var mode = req.params.mode;
+        redis.del('exclude_'+mode, term, function() {
+            res.send({ ok: true})
+        });
     });
     
     // GET /dictionary
@@ -83,8 +80,8 @@ module.exports = function TwitterService(app) {
         render_terms(req, res, {}, true);            
     });
 
-    // GET /:type/search
-    app.get('/twitter/:type/search', checkType, search, function(req, res) {
+    // GET /:mode/search
+    app.get('/twitter/:mode/search', checkMode, search, function(req, res) {
         render_terms(req, res, {});
     });
 
@@ -99,12 +96,12 @@ module.exports = function TwitterService(app) {
     });
     
     // GET /stream/analysis
-    app.get('/twitter/stream/analysis', stream.analysis, stream.users, getTags, function(req, res) {
+    app.get('/twitter/stream/analysis', stream.analysis, stream.users, function(req, res) {
         render_terms(req, res, {});
     });
     
     // GET /stream/following
-    app.get('/twitter/stream/following', stream.following, stream.users, getTags, function(req, res) {
+    app.get('/twitter/stream/following', stream.following, stream.users, function(req, res) {
         res.render('includes/following', { 
             users: req.users,
             type: null,
@@ -124,63 +121,20 @@ module.exports = function TwitterService(app) {
         res.send({ ok: true });
     });
     
-    // GET /:type
-    app.get('/twitter/:type', checkType, search, function(req, res) {
+    // GET /:mode
+    app.get('/twitter/:mode', checkMode, search, function(req, res) {
         render_terms(req, res, {}, true);
     });
     
     return this;
 
-    function exclude(req, res, next) {
-        var type = req.params.type;
-        var excluded = type == 'terms' ? exclude_terms : [];
-        redis.smembers('exclude_'+type, function(err, r) {
-            req.exclude = excluded.concat(r);
+    function search(req, res, next) {
+        var mode = req.params.mode;
+        Analysis[mode](req.query.q||{}, function(err, result) {
+            req.terms = result.terms;
+            req.tags = result.tags;
             next();
         });
-    }
-
-    function search(req, res, next) {
-        exclude(req, res, function() {
-            query(req, res, function() {
-                es.search('geo', 'message', req._query, function(err, data) {
-                    req.terms = JSON.parse(data).facets.blah.terms;
-                    getTags(req, res, next);
-                });
-            });
-        });
-    }
-
-    function query(req, res, next) {
-        var type = req.params.type;
-        var field = "text."+type;
-
-        req._query = {
-            "query": {
-                "match": {
-                }
-            },
-            "facets": {
-                "blah": {
-                    "terms": {
-                        "field": field,
-                        "exclude": req.exclude,
-                        "size": "400"
-                    }
-                }
-            }
-        };
-
-        if(req.query.q) {
-            req._query.query.match[field] = {
-                "query": decodeURI(req.query.q),
-                "operator" : "and"
-            };
-        } else {
-            req._query.query= { "match_all": {} }
-        }
-
-        next();
     }
 
     function render_terms(req, res, locals, full) {
@@ -239,25 +193,9 @@ module.exports = function TwitterService(app) {
         });
     }
 
-    function getTags(req, res, next) {
-        var terms = req.terms.map(function(t) {
-            return t.term;
-        });
-
-        Terms.getTags(terms, function(err, tags) {
-            req.tags = {};
-            terms.forEach(function(t, i) {
-                if(tags[i]) {
-                    req.tags[t] = tags[i];
-                }
-            });
-            next();
-        });
-    }
-
-    function checkType(req, res, next) {
-        var type = req.params.type;
-        if(!type.match(/^(terms|shingles)$/)) {
+    function checkMode(req, res, next) {
+        var mode = req.params.mode;
+        if(!mode.match(/^(terms|shingles)$/)) {
             res.send(404);
             return;
         }

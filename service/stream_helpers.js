@@ -3,6 +3,8 @@ module.exports = function(app) {
     var es = app.es;
     var Twitter = app.Twitter;
 
+    var Analysis = new (require('../domain/Analysis'))('stream', 'message');
+
     return {
         follow: follow,
         following: following,
@@ -74,6 +76,11 @@ module.exports = function(app) {
         });
     }
     
-    function analysis() {
+    function analysis(req, res, next) {
+        var type = req.params.type;
+        Analysis[type](q, function(err, result) {
+            req.terms = result;
+            next();
+        });
     }
 };
