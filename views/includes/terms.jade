@@ -4,8 +4,8 @@ ul.terms
       .pos
         p #{i+1}.&nbsp;
       .term
-        -if(type)
-          a(href='/twitter/#{type}/#!/p=#{encodeURI(t.term)}') #{t.term}
+        -if(mode)
+          a(href='/twitter/#{mode}/#!/p=#{encodeURI(t.term)}') #{t.term}
         -else
           a(href='#') #{t.term}
       .count
@@ -16,6 +16,6 @@ ul.terms
         .tags
           form
             ul.tagging
-              -if(tags[t.term])
-                each tag in tags[t.term].split(',')
+              -if(t.tags)
+                each tag in t.tags
                   li #{tag}

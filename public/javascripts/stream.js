@@ -18,7 +18,7 @@ $(function() {
                 }
             },
             beforeTagRemoved: function(evt, ui) {
-                var term = $(this).closest('li').find('.term').text().trim().toLowerCase();
+                var term = $(this).closest('li').find('.user').text().trim().toLowerCase();
                 var tag = $(ui.tag).find('[name=tags]').val().trim().replace(/\s/, '-');
                 ws.message('remove_tags', term, tag);
             }

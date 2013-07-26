@@ -80,7 +80,7 @@ $(function() {
         
         $('.action a').click(function(e) {
             e.preventDefault();
-            
+
             var term = $(this).closest('li').find('.term').text().trim();
             var type = location.pathname.match('terms') ? 'terms' : 'shingles';
             var exc_inc = $(this).attr('href');
@@ -95,8 +95,7 @@ $(function() {
             });
 
             function success(data) {
-                $('ul.terms').replaceWith(data);
-                clickExclude();
+                termsBrowser.search();
             }
         });        
     }

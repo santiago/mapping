@@ -77,8 +77,10 @@ module.exports = function(app) {
     }
     
     function analysis(req, res, next) {
-        var type = req.params.type;
-        Analysis[type](q, function(err, result) {
+        var mode = req.params.mode||'shingles';
+        var q = req.query.q || null;
+        Analysis[mode](q, function(err, result) {
+            console.log(result);
             req.terms = result;
             next();
         });

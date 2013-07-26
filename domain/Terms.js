@@ -29,7 +29,13 @@ module.exports = {
             redis.hget(TAGS, term, cb);
         } else {
             if(term.length) {
-                redis.hmget(TAGS, term, cb);
+                redis.hmget(TAGS, term, function(err, tags) {
+                    var _tags = {};
+                    tags.forEach(function(t, i) {
+                        _tags[term[i]] = t ? t.split(',') : t;
+                    });
+                    cb(null, _tags);
+                });
             }
         }
     },

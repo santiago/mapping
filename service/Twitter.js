@@ -5,7 +5,7 @@ module.exports = function TwitterService(app) {
     
     // Domain
     var Terms = require('../domain/Terms');
-    var Analysis = new (require('../domain/Analysis'))('geo', 'message');
+    var Analysis = new (require('../domain/Analysis'))('stream', 'message');
     
     // Service helpers
     var stream = require('./stream_helpers')(app);
@@ -43,9 +43,9 @@ module.exports = function TwitterService(app) {
     // Show all terms excluded
     app.get('/twitter/:mode/exclude', checkMode, function(req, res) {
         var mode = req.params.mode;
-        Terms.getExclude(mode, function() {
+        Terms.getExclude(mode, function(err, exclude) {
             render_terms(req, res, {
-                terms: req.exclude.sort().map(function(t) { return { term: t } }),
+                terms: exclude.sort().map(function(t) { return { term: t } }),
                 actions: ['include']
             }, true);
         });
@@ -56,13 +56,9 @@ module.exports = function TwitterService(app) {
     app.post('/twitter/:mode/exclude', checkMode, function(req, res) {
         var term = req.body.term;
         var mode = req.params.mode;
-        redis.sadd('exclude_'+mode, term, _search);
-
-        function _search() {
-            search(req, res, function() {
-                render_terms(req, res);
-            });
-        }
+        redis.sadd('exclude_'+mode, term, function() {
+            res.send({ ok: true });
+        });
     });
 
     // DELETE /exclude
@@ -96,12 +92,12 @@ module.exports = function TwitterService(app) {
     });
     
     // GET /stream/analysis
-    app.get('/twitter/stream/analysis', stream.analysis, stream.users, function(req, res) {
+    app.get('/twitter/stream/analysis', stream.analysis, function(req, res) {
         render_terms(req, res, {});
     });
     
     // GET /stream/following
-    app.get('/twitter/stream/following', stream.following, stream.users, function(req, res) {
+    app.get('/twitter/stream/following', stream.following, stream.users, getTags, function(req, res) {
         res.render('includes/following', { 
             users: req.users,
             type: null,
@@ -130,9 +126,8 @@ module.exports = function TwitterService(app) {
 
     function search(req, res, next) {
         var mode = req.params.mode;
-        Analysis[mode](req.query.q||{}, function(err, result) {
-            req.terms = result.terms;
-            req.tags = result.tags;
+        Analysis[mode](req.query.q||null, function(err, result) {
+            req.terms = result;
             next();
         });
     }
@@ -140,11 +135,11 @@ module.exports = function TwitterService(app) {
     function render_terms(req, res, locals, full) {
         full = full || false;
         var tpl = 'terms';
-        var type = req.params.type;
+        var mode = req.params.mode;
 
         var _locals = _.defaults(locals || {}, {
-            type: type,
-            tags: req.tags || null,
+            mode: mode,
+            tags: true || null,
             session_id: req.session_id,
             terms: req.terms,
             actions: ['exclude']
@@ -155,7 +150,7 @@ module.exports = function TwitterService(app) {
 
     function render_stream(req, res, locals) {
         var _locals = _.defaults(locals || {}, {
-            type: null,
+            mode: null,
             tags: req.tags || null,
             session_id: req.session_id,
             terms: req.terms,
@@ -190,6 +185,14 @@ module.exports = function TwitterService(app) {
         es.search('analysis', 'message', query, function(err, data) {
             req.terms = JSON.parse(data).facets.dictionary.terms;
             render_terms(req, res, {}, true);
+        });
+    }
+
+    function getTags(req, res, next) {
+        var terms = req.terms.map(function(t) { return t.term });
+        Terms.getTags(terms, function(err, tags) {
+            req.tags = tags;
+            next();
         });
     }
 

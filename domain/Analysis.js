@@ -23,8 +23,8 @@ var es = (function() {
     
 function search(mode, q, cb) {
     Terms.getExclude(mode, function(err, exclude) {
-        var q = query(mode, q);
-        es.search(this.index, this.type, q, function(err, data) {
+        var _query = query(mode, q, exclude);
+        es.search(this.index, this.type, _query, function(err, data) {
             getTags(JSON.parse(data).facets.blah.terms, cb);
         });
     }.bind(this));
@@ -76,9 +76,7 @@ function getTags(terms, cb) {
     var _terms = terms.map(function(t) {
         return t.term;
     });
-
     Terms.getTags(_terms, function(err, tags) {
-        var tags = {};
         terms.map(function(t, i) {
             return t.tags = tags[t.term];
         });

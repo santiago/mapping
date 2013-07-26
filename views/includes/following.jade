@@ -1,6 +1,8 @@
 .stream-actions
   button#sync.btn.btn-primary Syncronize
 
+p.total Following #{users.length}
+
 ul.following
   each user, i in users
     li.following-item
@@ -15,5 +17,5 @@ ul.following
         form
           ul.tagging
             -if(tags[user.screen_name.toLowerCase()])
-              each tag in tags[user.screen_name.toLowerCase()].split(',')
+              each tag in tags[user.screen_name.toLowerCase()]
                 li #{tag}
