@@ -3,6 +3,7 @@ module.exports = function(app) {
     var es = app.es;
     var Twitter = app.Twitter;
 
+    var Terms = require('../domain/Terms');
     var Analysis = new (require('../domain/Analysis'))('stream', 'message');
 
     return {
@@ -11,8 +12,23 @@ module.exports = function(app) {
         users: users,
         syncFollowing: syncFollowing,
         trending: trending,
-        analysis: analysis
+        analysis: analysis,
+        segmentation: segmentation
     };
+    
+    function segmentation(req, res, next) {
+        Terms.getAllTags(function(err, tags) {
+            req.tags = tags;
+            if(req.query.tag) {
+                Terms.getTerms(req.query.tag, function(err, data) {
+                    req.taggedSet = data;
+                    next();
+                });
+            } else {
+                next();    
+            }
+        });
+    }
     
     function following(req, res, next) {
         redis.hvals('stream:following:users', function(err, data) {

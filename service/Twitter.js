@@ -80,11 +80,6 @@ module.exports = function TwitterService(app) {
     app.get('/twitter/:mode/search', checkMode, search, function(req, res) {
         render_terms(req, res, {});
     });
-
-    // GET /stream
-    app.get('/twitter/stream', stream.following, function(req, res) {
-        render_stream(req, res, {}, true);
-    });
     
     // GET /stream/trending
     app.get('/twitter/stream/trending', stream.trending, function(req, res) {
@@ -94,6 +89,16 @@ module.exports = function TwitterService(app) {
     // GET /stream/analysis
     app.get('/twitter/stream/analysis', stream.analysis, function(req, res) {
         render_terms(req, res, {});
+    });
+    
+    // GET /stream/segmentation
+    app.get('/twitter/stream/segmentation', stream.segmentation, function(req, res) {
+        res.render('includes/segmentation', {
+            tag: req.query.tag,
+            tags: req.tags.sort(),
+            taggedSet: (req.taggedSet||[]).sort(),
+            session_id: req.session_id
+        });
     });
     
     // GET /stream/following
@@ -107,7 +112,7 @@ module.exports = function TwitterService(app) {
         });
     });
     
-    // POST /stream/following/sync
+    // POST /stream/sync
     app.post('/twitter/stream/sync', stream.syncFollowing, function(req, res) {
         res.send({ ok: true });
     });
@@ -117,6 +122,11 @@ module.exports = function TwitterService(app) {
         res.send({ ok: true });
     });
     
+    // GET /stream
+    app.get('/twitter/stream', stream.following, function(req, res) {
+        render_stream(req, res, {}, true);
+    });
+
     // GET /:mode
     app.get('/twitter/:mode', checkMode, search, function(req, res) {
         render_terms(req, res, {}, true);

@@ -9,16 +9,18 @@ $(function() {
     });
 
     function prepareTags() {
+        var termClass = $('ul.terms').length > 0 ? '.term' : '.user'; 
+
         $("ul.tagging").tagit({
             beforeTagAdded: function(evt, ui) {
                 if (!ui.duringInitialization) {
-                    var term = $(this).closest('li').find('.user').text().trim().toLowerCase();
+                    var term = $(this).closest('li').find(termClass).text().trim().toLowerCase();
                     var tag = $(ui.tag).find('[name=tags]').val().trim().replace(/\s/, '-');
                     ws.message('add_tags', term, tag);
                 }
             },
             beforeTagRemoved: function(evt, ui) {
-                var term = $(this).closest('li').find('.user').text().trim().toLowerCase();
+                var term = $(this).closest('li').find(termClass).text().trim().toLowerCase();
                 var tag = $(ui.tag).find('[name=tags]').val().trim().replace(/\s/, '-');
                 ws.message('remove_tags', term, tag);
             }
@@ -31,7 +33,9 @@ $(function() {
             "": "trending",
             "trending": "trending",
             "following": "following",
-            "analysis": "analysis"
+            "analysis": "analysis",
+            "segmentation": "segmentation",
+            "segmentation?:params": "segmentation"
         },
 
         trending: function(q) {
@@ -44,6 +48,10 @@ $(function() {
         
         analysis: function(q) {
             goTo('analysis', analysis);
+        },
+        
+        segmentation: function(params) {
+            goTo('segmentation', segmentation.bind(null, params));
         }
     }))();
 
@@ -79,12 +87,32 @@ $(function() {
     function analysis() {
     }
 
-    function goTo(section, cb) {
-        $.get('/twitter/stream/'+section, function(data) {
+    function segmentation(params) {
+        if(params.split('=')[0] != 'tag') return;
+
+        var tag = params.split('=')[1];
+        goTo('segmentation', { tag: tag }, function(data) {
+        });
+    }
+    
+    function goTo(section, params, cb) {
+        var query = '';
+        if(typeof params == 'function') { cb = params }
+        else {
+            query = (function() {
+                var q = '?'
+                for(var p in params) {
+                    q += p+"="+params[p];
+                }
+                return q;
+            })();
+        }
+
+        $.get('/twitter/stream/'+section+query, function(data) {
             $('.tab-content #'+section).html(data);
             prepareTags();
             $('a[href="#'+section+'"]').tab('show');
-            cb();
+            cb(data);
         });        
     }
 });

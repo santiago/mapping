@@ -1,0 +1,66 @@
+.container-fluid
+  .row-fluid
+    .span3
+      .well.sidebar-nav
+        ul.nav.nav-list
+          li.nav-header TAGS
+          each _tag in tags
+            li      
+              a(href="#segmentation?tag=#{_tag}") #{_tag}
+    .span9
+      .hero-unit.hidden
+        h1 Hello, world!
+        p 
+          | This is a template for a simple marketing or informational 
+          | website. It includes a large callout called the hero unit and 
+          | three supporting pieces of content. Use it as a starting 
+          | point to create something more unique.
+
+        p
+          a.btn.btn-primary.btn-largeLearn(href="#") more »
+      
+      .row-fluid
+        .span4
+          .well.sidebar-nav
+            h3.tag-title #{tag}
+            ul.nav.nav-list
+              each t in taggedSet
+                li      
+                  a(href="#") #{t}
+        
+        .span4
+          h2 Heading
+          p 
+            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
+          p
+            a.btn(href="#") View details »
+        
+        .span4
+          h2 Heading
+          p 
+            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
+          p
+            a.btn(href="#") View details »
+        
+      
+      .row-fluid.hidden
+        .span4
+          h2 Heading
+          p 
+            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
+          p
+            a.btn(href="#") View details »
+        
+        .span4
+          h2 Heading
+          p 
+            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
+          p
+            a.btn(href="#") View details »
+        
+        .span4
+          h2 Heading
+          p 
+            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
+          p
+            a.btn(href="#") View details »

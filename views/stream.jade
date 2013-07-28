@@ -12,18 +12,20 @@ block head
 block content
   #main.wrapper
     ul#stream-nav.nav.nav-tabs
-      li.active
+      li
         a(href='#trending') Trending
       li
         a(href='#following') Following
       li
         a(href='#analysis') Analysis
+      li
+        a(href='#segmentation') Segmentation
 
     .tab-content
       #trending.tab-pane.active
       #following.tab-pane
       #analysis.tab-pane
-      
+      #segmentation.tab-pane
 
 block javascripts
   script(type="text/javascript", src="/javascripts/stream.js")

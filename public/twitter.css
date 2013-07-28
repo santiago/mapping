@@ -16,4 +16,5 @@ li.following-item .user{width:200px;margin-left:10px}
 li.following-item .action{width:50px;font-size:12px;margin-right:10px}
 .stream-actions{padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #ddd}
 #stream-nav{margin-bottom:10px}
+h3.tag-title{margin:0;padding-left:15px}
 .tagging.ui-widget{font-size:11px}

@@ -8,7 +8,7 @@ module.exports = function(ws) {
     }
     
     TermsRPCService.prototype.addTags = function(client, term, tags) {
-        Terms.addTags(term, tags, function() {
+        Terms.updateTags(term, tags, function() {
             // Notify all clients
             ws.message('tags', term, tags);
         });
