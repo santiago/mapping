@@ -51,7 +51,7 @@ $(function() {
         },
         
         segmentation: function(params) {
-            goTo('segmentation', segmentation.bind(null, params));
+            goTo('segmentation', params, segmentation);
         }
     }))();
 
@@ -87,18 +87,19 @@ $(function() {
     function analysis() {
     }
 
-    function segmentation(params) {
-        if(params.split('=')[0] != 'tag') return;
-
-        var tag = params.split('=')[1];
-        goTo('segmentation', { tag: tag }, function(data) {
-        });
+    function segmentation(data) {
+        console.log(data);
+//        if(params.split('=')[0] != 'tag') return;
+//
+//        var tag = params.split('=')[1];
+//        goTo('segmentation', { tag: tag }, function(data) {
+//        });
     }
     
     function goTo(section, params, cb) {
-        var query = '';
+        var query = params ? '?'+params : '';
         if(typeof params == 'function') { cb = params }
-        else {
+        /*else {
             query = (function() {
                 var q = '?'
                 for(var p in params) {
@@ -106,7 +107,7 @@ $(function() {
                 }
                 return q;
             })();
-        }
+        }*/
 
         $.get('/twitter/stream/'+section+query, function(data) {
             $('.tab-content #'+section).html(data);

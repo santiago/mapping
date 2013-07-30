@@ -1,30 +1,15 @@
 var redis = require('redis').createClient();
 var _ = require('underscore');
 var Terms = require('./Terms');
-
-// Connect to ElasticSearch and export
-var esclient = (function() {
-    var fork = true;
-    if(fork) {
-        return require('/Projects/node-elasticsearch-client');
-    }
-    return require('elasticsearchclient');
-})();
-
-// Initialize ES
-var es = (function() {
-    var opts = {
-        host: 'localhost',
-        port: 9200
-    };
-
-    return new (esclient)(opts);
-})();
+var es = require('./Search');
     
 function search(mode, q, cb) {
     Terms.getExclude(mode, function(err, exclude) {
         var _query = query(mode, q, exclude);
+        console.log(_query);
         es.search(this.index, this.type, _query, function(err, data) {
+            console.log(err);
+            console.log(data);
             getTags(JSON.parse(data).facets.blah.terms, cb);
         });
     }.bind(this));
@@ -60,11 +45,13 @@ function query(mode, q, exclude) {
         }
     };
 
-    if(q) {
+    if(q && typeof q == 'string') {
         _query.query.match[field] = {
             "query": decodeURI(q),
             "operator" : "and"
         };
+    } else if(q && typeof q == 'object') {
+        _query.query= q.query;
     } else {
         _query.query= { "match_all": {} }
     }
@@ -97,4 +84,46 @@ Analysis.prototype.terms = function(q, cb) {
 
 Analysis.prototype.shingles = function(q, cb) {
     search.call(this, 'shingles', q, cb);
+};
+
+Analysis.prototype.segmentation = function(tag, cb) {
+    var _this = this;
+
+    Terms.getTerms(tag, function(err, terms) {
+        _search(terms.map(function(t) {
+            if(t.split(' ').length > 1) {
+                return '"'+t+'"';
+            } else {
+                return t;
+            }
+        }));
+    });
+
+    function _search(query) {
+        console.log(query);
+        var _shingles = query.filter(function(t) { return t.split(" ").length > 1 });
+        var _terms = query.filter(function(t) { return t.split(" ").length == 1 });
+        
+        var q = {
+            "query": {
+                "bool" : {
+                    "should": [
+                        {
+                            "terms": { 
+                                "text.terms": _terms
+                            }
+                        },
+                        {
+                            "terms": { 
+                                "text.shingles": _shingles
+                            }
+                        }
+                    ]
+                }
+            }
+        };
+        console.log();
+        console.log(JSON.stringify(q));console.log();
+        search.call(_this, 'shingles', q, cb);
+    }
 };

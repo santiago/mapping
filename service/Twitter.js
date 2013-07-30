@@ -97,6 +97,10 @@ module.exports = function TwitterService(app) {
             tag: req.query.tag,
             tags: req.tags.sort(),
             taggedSet: (req.taggedSet||[]).sort(),
+            terms: req.terms,
+            mode: 'shingles',
+            actions: [],
+            showTags: false,
             session_id: req.session_id
         });
     });
@@ -149,7 +153,7 @@ module.exports = function TwitterService(app) {
 
         var _locals = _.defaults(locals || {}, {
             mode: mode,
-            tags: true || null,
+            showTags: true || null,
             session_id: req.session_id,
             terms: req.terms,
             actions: ['exclude']

@@ -1,4 +1,5 @@
 module.exports = function(app) {
+    var _ = require('underscore');
     var redis = app.redis;
     var es = app.es;
     var Twitter = app.Twitter;
@@ -22,7 +23,10 @@ module.exports = function(app) {
             if(req.query.tag) {
                 Terms.getTerms(req.query.tag, function(err, data) {
                     req.taggedSet = data;
-                    next();
+                    Analysis.segmentation(req.query.tag, function(err, terms) {
+                        req.terms = terms;
+                        next(); 
+                    });
                 });
             } else {
                 next();    
@@ -44,8 +48,12 @@ module.exports = function(app) {
             function getNextUser() {
                 var id = data.shift();
                 if(!id) {
+                    // We need terms for getting tags
                     req.terms = req.users.map(function(u) {
                         return { term: u.screen_name.toLowerCase() }
+                    });
+                    req.users = _.sortBy(req.users, function(u) {
+                        return u.screen_name;
                     });
                     next();
                     return;
