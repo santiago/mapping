@@ -97,7 +97,7 @@ module.exports = function TwitterService(app) {
             tag: req.query.tag,
             tags: req.tags.sort(),
             taggedSet: (req.taggedSet||[]).sort(),
-            terms: req.terms,
+            terms: req.terms||[],
             mode: 'shingles',
             actions: [],
             showTags: false,

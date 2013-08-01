@@ -1,11 +1,13 @@
 .container-fluid
   .row-fluid
     .span3
-      .well.sidebar-nav
-        ul.nav.nav-list
-          li.nav-header TAGS
+      .panel
+        .panel-heading
+          h3.panel-title Tags
+        ul.list-group.list-group-flush
+          -tags.shift()
           each _tag in tags
-            li      
+            li.list-group-item
               a(href="#segmentation?tag=#{_tag}") #{_tag}
     .span9
       .hero-unit.hidden
@@ -21,17 +23,45 @@
       
       .row-fluid
         .span3
-          .well.sidebar-nav
-            h3.tag-title #{tag}
-            ul.nav.nav-list
+          .panel
+            .panel-heading
+              h3.panel-title #{tag}
+            ul.list-group.list-group-flush
               each t in taggedSet
-                li      
+                li.list-group-item      
                   p #{t}
         
         .span9
-          .sidebar-nav
-            h3.tag-title #{tag}
-            include terms
+          .panel.panel-primary
+            .panel-heading
+              h3.panel-title #{tag}
+            .btn-group
+              button.btn.btn-default(type="button") Terms
+              button.btn.btn-default.active(type="button") Shingles
+              button.btn.btn-default(type="button") Links
+            button(type="button", class="btn btn-primary pull-right") Clean up
+            table.terms.table.table-condensed
+              each t, i in terms
+                tr
+                  td.pos
+                    p #{i+1}&nbsp;
+                  td.term
+                    -if(mode)
+                      a(href='/twitter/#{mode}/#!/p=#{encodeURI(t.term)}') #{t.term}
+                    -else
+                      a(href='#') #{t.term}
+                  td.count
+                    p 
+                      span.badge #{t.count}
+                  td.action
+                    include actions
+                  -if(showTags)
+                    td.tags
+                      form
+                        ul.tagging
+                          -if(t.tags)
+                            each tag in t.tags
+                              li #{tag}
 
         .span4.hidden
           h2 Heading

@@ -90,17 +90,10 @@ Analysis.prototype.segmentation = function(tag, cb) {
     var _this = this;
 
     Terms.getTerms(tag, function(err, terms) {
-        _search(terms.map(function(t) {
-            if(t.split(' ').length > 1) {
-                return '"'+t+'"';
-            } else {
-                return t;
-            }
-        }));
+        _search(terms);
     });
 
     function _search(query) {
-        console.log(query);
         var _shingles = query.filter(function(t) { return t.split(" ").length > 1 });
         var _terms = query.filter(function(t) { return t.split(" ").length == 1 });
         
