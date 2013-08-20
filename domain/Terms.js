@@ -96,7 +96,6 @@ module.exports = api = {
             var _terms = {};
             data.forEach(function(terms, i) {
                 var tag = tags[i];
-                console.log(terms);
                 _terms[tag] = (terms||'').split(',');
                 var index = _terms[tag].indexOf(term);
                 if(index > -1) {

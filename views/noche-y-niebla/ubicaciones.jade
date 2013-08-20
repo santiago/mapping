@@ -1,0 +1,22 @@
+ul.list-group.list-group-flush
+  each u in byDepto
+    li.list-group-item
+      .row-fluid
+        .span10
+          .input-group
+            input.form-control(type="text", value="#{u}")
+            input(type="hidden", name="orig", value="#{u}")
+            .input-group-btn
+              button.update-ubicacion.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown")
+                | . . . &nbsp;
+                span.caret 
+              ul.dropdown-menu.pull-right
+                li
+                  a(href="#") Map
+                li
+                  a(href="#") Edit
+                li
+                  a(href="#") Delete
+        .span2
+          p
+            button.btn.btn-success.btn-xs(type="button") Mapa

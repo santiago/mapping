@@ -64,6 +64,7 @@ app.configure(function() {
         compile: compile
     }));
     this.use(express.favicon(__dirname + '/public/favicon.ico', { maxAge: 2592000000 }));
+    this.use(express.compress());
     this.use(express.static(__dirname + '/public'));
 
     this.use(everyauth.middleware());
@@ -120,7 +121,7 @@ app.Twitter = require('./domain/Twitter');
 
 // Start Services
 app.services = {};
-['Mapping', 'Twitter'].forEach(function(name) {
+['Mapping', 'Twitter', 'NocheYNiebla'].forEach(function(name) {
     var services = require('./service/'+name);
     if (!(services instanceof Array)) {
         services = [services]

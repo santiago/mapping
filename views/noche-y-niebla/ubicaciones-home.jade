@@ -1,0 +1,51 @@
+extends noche-y-niebla-layout
+
+block head
+  link(rel= 'stylesheet', href= '/stylesheets/css3.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/twitter.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/stylesheets/jquery.tagit.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/stylesheets/tagit.ui-zendesk.css', type= 'text/css')
+  title Noche y Niebla - Catálogo de Víctimas en Colombia
+  style
+    #map { height:600px; width:100%; }
+
+block content
+  #main.wrapper
+    ul#stream-nav.nav.nav-tabs
+      li
+        a(href='/nocheyniebla') Casos
+      li.active
+        a(href='#') Ubicaciones
+
+    .tab-content
+      #casos.tab-pane
+      #ubicaciones.tab-pane.active
+        .container-fluid
+          .row-fluid
+            .span5
+              .row-fluid        
+                .span12
+                  .panel.panel-primary
+                    .panel-heading
+                      h3.panel-title Ubicaciones
+                    .panel-group#accordion
+                      each d in deptos
+                        .panel.panel-default.panel-depto
+                          .panel-heading
+                            h4.panel-title
+                              a.accordion-toggle(data-toggle="false", data-parent="#accordion", href="##{d.toLowerCase()}")
+                                Collapsible #{d}
+                          .panel-collapse.collapse(id="#{d.toLowerCase()}")
+                            .panel-body.panel-depto
+                              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+
+            .span7
+              .row-fluid        
+                .span12
+                  .panel
+                    .panel-heading
+                      h3.panel-title Ubicaciones
+                    #map
+
+block javascripts
+  script(type="text/javascript", src="/javascripts/noche-y-niebla.js")

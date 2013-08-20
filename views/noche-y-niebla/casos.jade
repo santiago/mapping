@@ -1,0 +1,39 @@
+.container-fluid
+  .row-fluid
+    .span3
+      .panel
+        .panel-heading
+          h3.panel-title Responsables
+        ul.list-group.list-group-flush
+          each _resp in responsables
+            li.list-group-item
+              .checkbox
+                label
+                  input(type="checkbox", value="#{_resp.value}")
+                  | #{_resp.label}
+    .span9      
+      .row-fluid
+        .span3
+          .panel
+            .panel-heading
+              h3.panel-title Tipificaciones
+            ul.list-group.list-group-flush
+              each t in tipificaciones
+                li.list-group-item      
+                  .checkbox
+                    label
+                      input(type="checkbox", value="#{t.value}")
+                      | #{t.label}
+        
+        .span9
+          .panel.panel-primary
+            .panel-heading
+              h3.panel-title Municipios
+            ul.list-group.list-group-flush
+              each u in ubicaciones
+                li.list-group-item      
+                  .input-group
+                    input.form-control(type="text", value="#{u}")
+                    input(type="hidden", name="orig", value="#{u}")
+                    span.input-group-btn
+                      button.update-ubicacion.btn.btn-default(type="button") Ok

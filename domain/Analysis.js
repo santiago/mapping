@@ -6,17 +6,14 @@ var es = require('./Search');
 function search(mode, q, cb) {
     Terms.getExclude(mode, function(err, exclude) {
         var _query = query(mode, q, exclude);
-        console.log(_query);
         es.search(this.index, this.type, _query, function(err, data) {
-            console.log(err);
-            console.log(data);
             getTags(JSON.parse(data).facets.blah.terms, cb);
         });
     }.bind(this));
 }
 
 function query(mode, q, exclude) {
-    var field = "text."+mode;
+    var field = mode == 'links' ? 'urls' : "text."+mode;
 
     var exclude_base = [
         "htt", "http", "https", "ca", "co", "com", "amps", "em", "lts3", "xd", "eu",
@@ -86,7 +83,9 @@ Analysis.prototype.shingles = function(q, cb) {
     search.call(this, 'shingles', q, cb);
 };
 
-Analysis.prototype.segmentation = function(tag, cb) {
+Analysis.prototype.segmentation = function(opts, cb) {
+    var tag = opts.tag;
+    var mode = opts.m || opts.mode || 'shingles';
     var _this = this;
 
     Terms.getTerms(tag, function(err, terms) {
@@ -115,8 +114,6 @@ Analysis.prototype.segmentation = function(tag, cb) {
                 }
             }
         };
-        console.log();
-        console.log(JSON.stringify(q));console.log();
-        search.call(_this, 'shingles', q, cb);
+        search.call(_this, mode, q, cb);
     }
 };

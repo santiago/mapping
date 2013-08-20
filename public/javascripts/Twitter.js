@@ -4,7 +4,10 @@ $(function() {
 
     var geoJson = [{
         type: 'Feature',
-        "geometry": { "type": "Point", "coordinates": [-77.03, 38.90]},
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-77.03, 38.90]
+        },
         "properties": {
             "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Cherry_Blossoms_and_Washington_Monument.jpg/320px-Cherry_Blossoms_and_Washington_Monument.jpg",
             "url": "http://en.wikipedia.org/wiki/Washington,_D.C.",
@@ -13,7 +16,10 @@ $(function() {
         }
     }, {
         type: 'Feature',
-        "geometry": { "type": "Point", "coordinates": [-87.63, 41.88]},
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-87.63, 41.88]
+        },
         "properties": {
             "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Chicago_sunrise_1.jpg/640px-Chicago_sunrise_1.jpg",
             "url": "http://en.wikipedia.org/wiki/Chicago",
@@ -21,7 +27,10 @@ $(function() {
         }
     }, {
         type: 'Feature',
-        "geometry": { "type": "Point", "coordinates": [-74.00, 40.71]},
+        "geometry": {
+            "type": "Point",
+            "coordinates": [-74.00, 40.71]
+        },
         "properties": {
             "image": "http://upload.wikimedia.org/wikipedia/commons/thumb/3/39/NYC_Top_of_the_Rock_Pano.jpg/640px-NYC_Top_of_the_Rock_Pano.jpg",
             "url": "http://en.wikipedia.org/wiki/New_York_City",
@@ -41,10 +50,10 @@ $(function() {
             var feature = marker.feature;
 
             // Create custom popup content
-            var popupContent =  '<h2>' + feature.properties.city + '</h2>';
+            var popupContent = '<h2>' + feature.properties.city + '</h2>';
 
             // http://leafletjs.com/reference.html#popup
-            marker.bindPopup(popupContent,{
+            marker.bindPopup(popupContent, {
                 closeButton: false,
                 minWidth: 320
             });
@@ -52,42 +61,84 @@ $(function() {
         });
     });
 
-    map.setView([4.5980478, -74.0760867], 6);
+    map.setView([4.5980478, - 74.0760867], 6);
 
     setTimeout(getData, 2000);
 
     function getData() {
-        $.getJSON('/twitter/municipios', function(data) {
-            var circles = data.geometry.coordinates
-                .map(function(c) {
-                    return L.circle(c.reverse(), 200).addTo(map)
-                });
+        $.getJSON('/nocheyniebla/ubicaciones/antioquia.geojson', function(data) {
+            var circles = data.geometry.coordinates.map(function(c) {
+                return L.circle(c.reverse(), 200).addTo(map)
+            });
 
             // L.layerGroup(circles).addTo(map);
-        });        
+        });
+
+        $.getJSON('/municipios.json', function(data) {
+            geojson = L.geoJson(data, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+        });
     }
 
+    function highlightFeature(e) {
+        var layer = e.target;
 
+        layer.setStyle({
+            weight: 3,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
 
+        if (!L.Browser.ie && !L.Browser.opera) {
+            layer.bringToFront();
+        }
 
+//        info.update(layer.feature.properties);
+    }
 
+    var geojson;
 
+    function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+//        info.update();
+    }
 
+    function zoomToFeature(e) {
+        map.fitBounds(e.target.getBounds());
+    }
 
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: zoomToFeature
+        });
+    }
 
-    //     map.zoom(6).center({
-    //         lat: 4.5980478,
-    //         lon: -74.0760867
-    //     });
+    // get color depending on population density value
+    function getColor(d) {
+        return  d > 0.50 ? '#800026' : 
+                d > 0.30 ? '#BD0026' : 
+                d > 0.10 ? '#E31A1C' : 
+                d > 0.08 ? '#FC4E2A' : 
+                d > 0.06 ? '#FD8D3C' : 
+                d > 0.04 ? '#FEB24C' : 
+                d > 0.02 ? '#FED976' : '#FFEDA0';
+    }
 
-    
-    // /*  @Singleton
-    //  *  @UI MapBox Implemantion of Map interface
-    //  */
-    // var Map = function _Map() {
-    //     mapbox.auto('map', 'examples.map-20v6611k', render.bind(this));
-    // };
+    function style(feature) {
+        return {
+            weight: 1,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.6,
+            fillColor: getColor(feature.properties.Shape_Area)
+        };
+    }
 
-    // new Map();
 
 });

@@ -9,18 +9,7 @@
           each _tag in tags
             li.list-group-item
               a(href="#segmentation?tag=#{_tag}") #{_tag}
-    .span9
-      .hero-unit.hidden
-        h1 Hello, world!
-        p 
-          | This is a template for a simple marketing or informational 
-          | website. It includes a large callout called the hero unit and 
-          | three supporting pieces of content. Use it as a starting 
-          | point to create something more unique.
-
-        p
-          a.btn.btn-primary.btn-largeLearn(href="#") more »
-      
+    .span9      
       .row-fluid
         .span3
           .panel
@@ -35,10 +24,10 @@
           .panel.panel-primary
             .panel-heading
               h3.panel-title #{tag}
-            .btn-group
-              button.btn.btn-default(type="button") Terms
-              button.btn.btn-default.active(type="button") Shingles
-              button.btn.btn-default(type="button") Links
+            .btn-group#mode-nav
+              a.btn.btn-default(type="button", href="#segmentation?tag=#{tag}&m=terms") Terms
+              a.btn.btn-default.active(type="button", href="#segmentation?tag=#{tag}&m=shingles") Shingles
+              a.btn.btn-default(type="button", href="#segmentation?tag=#{tag}&m=links") Links
             button(type="button", class="btn btn-primary pull-right") Clean up
             table.terms.table.table-condensed
               each t, i in terms
@@ -46,8 +35,10 @@
                   td.pos
                     p #{i+1}&nbsp;
                   td.term
-                    -if(mode)
+                    -if(['terms', 'shingles'].indexOf(mode) > -1)
                       a(href='/twitter/#{mode}/#!/p=#{encodeURI(t.term)}') #{t.term}
+                    -else if(mode == 'links')
+                      a(href='#{t.term}', target='_blank') #{t.term}
                     -else
                       a(href='#') #{t.term}
                   td.count
@@ -62,33 +53,3 @@
                           -if(t.tags)
                             each tag in t.tags
                               li #{tag}
-
-        .span4.hidden
-          h2 Heading
-          p 
-            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
-          p
-            a.btn(href="#") View details »
-        
-      
-      .row-fluid.hidden
-        .span4
-          h2 Heading
-          p 
-            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
-          p
-            a.btn(href="#") View details »
-        
-        .span4
-          h2 Heading
-          p 
-            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
-          p
-            a.btn(href="#") View details »
-        
-        .span4
-          h2 Heading
-          p 
-            | Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. 
-          p
-            a.btn(href="#") View details »

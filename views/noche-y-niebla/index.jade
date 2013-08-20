@@ -1,0 +1,23 @@
+extends noche-y-niebla-layout
+
+block head
+  link(rel= 'stylesheet', href= '/stylesheets/css3.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/twitter.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/stylesheets/jquery.tagit.css', type= 'text/css')
+  link(rel= 'stylesheet', href= '/stylesheets/tagit.ui-zendesk.css', type= 'text/css')
+  title Noche y Niebla - Catálogo de Víctimas en Colombia
+
+block content
+  #main.wrapper
+    ul#stream-nav.nav.nav-tabs
+      li.active
+        a(href='#trending') Casos
+      li
+        a(href='/nocheyniebla/ubicaciones') Ubicaciones
+
+    .tab-content
+      #casos.tab-pane.active
+        include casos
+
+block javascripts
+  script(type="text/javascript", src="/javascripts/noche-y-niebla.js")

@@ -1,0 +1,61 @@
+!!! 5
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    meta(name='description', content='')
+    meta(name='author', content='')
+
+    link(href='/stylesheets/bootstrap.css', rel='stylesheet')
+    style
+      /* To push content below navbar */
+      @media (min-width: 980px) {
+      body {
+      margin-top: 41px;
+      }
+      }
+      .sidebar-nav {
+      padding: 9px 0;
+      }
+      @media (max-width: 980px) {
+      /* Enable use of floated navbar text */
+      .navbar-text.pull-right {
+      float: none;
+      padding-left: 5px;
+      padding-right: 5px;
+      }
+      }
+    link(href='/stylesheets/bootstrap-responsive.css', rel='stylesheet')
+    link(href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.css', rel='stylesheet')
+    link(href='/twitter.css', rel='stylesheet')  
+    script(src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js')
+    script(src="http://d3js.org/d3.v3.js")
+    block head
+
+  body
+    .navbar.navbar-inverse.navbar-fixed-top
+      a.navbar-brand(href='#') Noche y Niebla
+      .nav-collapse.collapse
+      .btn-group
+        a.btn.btn-default.dropdown-toggle(data-toggle="dropdown", href="#")
+          | Section
+          span.caret
+        ul.dropdown-menu
+          li
+            a(href='#') Terms
+          li
+            a(href='#') Shingles
+          li
+            a(href='#') Dictionary
+          li
+            a(href='#') Geo
+
+    block content
+    script(type="text/javascript", src="/javascripts/thirdparty/jquery/jquery-1.8.min.js")
+    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.12/jquery-ui.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/tag-it.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/ws-rpc-client.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/bootstrap.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/underscore.min.js")
+    script(type="text/javascript", src="/javascripts/thirdparty/backbone.min.js")
+    block javascripts

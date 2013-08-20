@@ -5,7 +5,7 @@ module.exports = function(app) {
     var Twitter = app.Twitter;
 
     var Terms = require('../domain/Terms');
-    var Analysis = new (require('../domain/Analysis'))('stream', 'message');
+    var Analysis = new (require('../domain/Analysis'))('stream2', 'message');
 
     return {
         follow: follow,
@@ -23,7 +23,7 @@ module.exports = function(app) {
             if(req.query.tag) {
                 Terms.getTerms(req.query.tag, function(err, data) {
                     req.taggedSet = data;
-                    Analysis.segmentation(req.query.tag, function(err, terms) {
+                    Analysis.segmentation(req.query, function(err, terms) {
                         req.terms = terms;
                         next(); 
                     });
@@ -93,6 +93,27 @@ module.exports = function(app) {
         });
     }
     
+    function links(req, res, next) {
+        var query = {
+            "query": {
+                "match_all": {}
+            },
+            "facets": {
+                "mentions": {
+                    "terms": {
+                        "field": "entities.user_mentions.screen_name",
+                        "size": "1000"
+                    }
+                }
+            }
+        };
+        
+        es.search('twitter', 'tweet', query, function(err, data) {
+            req.terms = JSON.parse(data).facets.mentions.terms;
+            next();
+        });
+    }
+    
     // Creates a friendship
     function follow(req, res, next) {
         Twitter.follow(req.body.user, function() {
@@ -104,7 +125,6 @@ module.exports = function(app) {
         var mode = req.params.mode||'shingles';
         var q = req.query.q || null;
         Analysis[mode](q, function(err, result) {
-            console.log(result);
             req.terms = result;
             next();
         });

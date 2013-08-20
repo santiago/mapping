@@ -5,7 +5,7 @@ module.exports = function TwitterService(app) {
     
     // Domain
     var Terms = require('../domain/Terms');
-    var Analysis = new (require('../domain/Analysis'))('stream', 'message');
+    var Analysis = new (require('../domain/Analysis'))('geo', 'message');
     
     // Service helpers
     var stream = require('./stream_helpers')(app);
@@ -98,7 +98,7 @@ module.exports = function TwitterService(app) {
             tags: req.tags.sort(),
             taggedSet: (req.taggedSet||[]).sort(),
             terms: req.terms||[],
-            mode: 'shingles',
+            mode: req.query.m || req.query.mode || 'shingles',
             actions: [],
             showTags: false,
             session_id: req.session_id

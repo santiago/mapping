@@ -88,26 +88,33 @@ $(function() {
     }
 
     function segmentation(data) {
-        console.log(data);
-//        if(params.split('=')[0] != 'tag') return;
-//
-//        var tag = params.split('=')[1];
-//        goTo('segmentation', { tag: tag }, function(data) {
-//        });
+        $("#mode-nav button").click(function(e) {
+            e.preventDefault();
+            var mode = $(this).attr('mode');
+            var tag = $(this).closest('.panel').find('h3.panel-title').text().trim();
+            goTo('segmentation', { tag: tag, m: mode }, segmentation);
+        });
     }
     
     function goTo(section, params, cb) {
-        var query = params ? '?'+params : '';
-        if(typeof params == 'function') { cb = params }
-        /*else {
-            query = (function() {
+
+        var query = {
+            'function': function() {
+                cb = params;
+                return '';
+            },
+            'object': function() {
                 var q = '?'
                 for(var p in params) {
-                    q += p+"="+params[p];
+                    q += p+"="+params[p]+'&';
                 }
-                return q;
-            })();
-        }*/
+                return q;                
+            },
+            'string': function() {
+                return (params ? '?'+params : '');
+            }
+        }[typeof (params||'')]();
+        
 
         $.get('/twitter/stream/'+section+query, function(data) {
             $('.tab-content #'+section).html(data);

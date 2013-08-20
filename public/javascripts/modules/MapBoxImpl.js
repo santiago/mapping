@@ -5,17 +5,15 @@
  */
 define(function() {
     function render(map) {
-        console.log(this)
-        
         this.map = map;
         /*l = d3layer().data(new_jersey);
         map.addLayer(l);
         map.extent(l.extent());*/
-            
+
         $('#map').trigger('mapready');
-        
+
         function error() {}
-            
+
         function success(position) {
             map.zoom(17).center({
                 lat: position.coords.latitude,
@@ -40,12 +38,12 @@ define(function() {
             alert('Geolocation not supported');
             return;
         }
-        
+
         // Create an empty markers layer
         this.markers = mapbox.markers.layer();
         this.map.addLayer(this.markers);
     }
-    
+
     /*  @Singleton
      *  @UI MapBox Implemantion of Map interface
      */
@@ -53,11 +51,11 @@ define(function() {
         this.nodes = {};
         mapbox.auto('map', 'examples.map-vyofok3q', render.bind(this));
     }
-    
+
     Map.prototype.startPointing = function(callback) {
         var self = this;
         this._marking = true;
-        
+
         if(!this.pointingLayer) {
             this.pointingLayer = mapbox.markers.layer();
             this.pointingLayer.features([{
