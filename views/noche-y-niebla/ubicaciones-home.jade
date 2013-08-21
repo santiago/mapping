@@ -25,7 +25,23 @@ block content
             .span5
               .row-fluid        
                 .span12
-                  .panel.panel-primary
+                  .panel.panel-primary.panel-depto
+                    .panel-heading
+                      h3.panel-title Ubicaciones
+                    .panel-body
+                      &nbsp;
+                    ul.list-group
+                      each d in deptos
+                        li.list-group-item
+                          .row-fluid
+                            .span5
+                              h4.panel-title
+                                a(href='##{d.toLowerCase()}') #{d}
+                            .span2
+                              button.map.btn.btn-default.btn-xs(type="button") Mapa
+
+
+                  .panel.panel-primary.hidden
                     .panel-heading
                       h3.panel-title Ubicaciones
                     .panel-group#accordion

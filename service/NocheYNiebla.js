@@ -26,6 +26,18 @@ module.exports = function NyNService(app) {
     function getUbicacionesOk(req, res, next) {
         NyN.getUbicacionesOk(function(err, data) {
             req.ubicaciones = data;
+
+            req.byDepto = {};
+            req.ubicaciones.forEach(function(u) {
+                var depto = null;
+                try {
+                  depto = u.match(new RegExp(".+,(.+)$"))[1];
+                } catch(e) { return; }
+                try {
+                  req.byDepto[depto].push(u);
+                } catch(e) { req.byDepto[depto] = [u] }
+            });
+
             next();
         });
     }
@@ -63,20 +75,9 @@ module.exports = function NyNService(app) {
     });
     
     app.get('/nocheyniebla/ubicaciones', getUbicacionesOk, function(req, res) {
-        var byDepto = {};
-        req.ubicaciones.forEach(function(u) {
-            var depto = null;
-            try {
-              depto = u.match(new RegExp(".+,(.+)$"))[1];
-            } catch(e) { return; }
-            try {
-              byDepto[depto].push(u);
-            } catch(e) { byDepto[depto] = [u] }
-        });
-
         res.render('noche-y-niebla/ubicaciones-home', {
-            byDepto: byDepto['antioquia'],
-            deptos: Object.keys(byDepto).map(function(d) { return _(d).capitalize() }).sort()
+            byDepto: req.byDepto['antioquia'],
+            deptos: Object.keys(req.byDepto).map(function(d) { return _(d).capitalize() }).sort()
         });
     });
 

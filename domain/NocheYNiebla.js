@@ -53,6 +53,10 @@ function getUbicacionesOk(cb) {
     redis.hkeys('nocheyniebla:ubicacion:casos:ok', cb);
 }
 
+function getUbicacionesCasos(cb) {
+    redis.hgetall('nocheyniebla:ubicacion:casos:ok', cb);
+}
+
 function getUbicacionesGeo(depto, cb) {
     redis.hgetall('nocheyniebla:ubicaciones:geo', function(err, data) {
         var locations = Object.keys(data).filter(function(k) {
