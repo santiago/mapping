@@ -8,6 +8,7 @@ module.exports = {
     'getUbicaciones': getUbicaciones,
     'getUbicacionesOk': getUbicacionesOk,
     'getUbicacionesGeo': getUbicacionesGeo,
+    'getUbicacionesCasos': getUbicacionesCasos,
     'findUbicacion': findUbicacion,
     'updateUbicacion': updateUbicacion,
     'params': params
@@ -58,6 +59,28 @@ function getUbicacionesCasos(cb) {
 }
 
 function getUbicacionesGeo(depto, cb) {
+    getUbicacionesCasos(_getUbicacionesGeo);
+    
+    function _getUbicacionesGeo(err, casos) {
+        redis.hgetall('nocheyniebla:ubicaciones:geo', function(err, data) {
+            var locations = Object.keys(data).filter(function(k) {
+                return k.match(new RegExp(depto+",colombia$")) && data[k];
+            });
+
+            cb( null,
+                locations.map(function(u) {
+                    return {
+                        "title": u,
+                        "location": data[u].split(',').map(function(l) { return parseFloat(l||0); }),
+                        "casos": casos[u.replace(/,colombia$/, '')].split(',').length
+                    }
+                })
+            )
+        });
+    }
+}
+
+function getUbicacionesGeoJSON(depto, cb) {
     redis.hgetall('nocheyniebla:ubicaciones:geo', function(err, data) {
         var locations = Object.keys(data).filter(function(k) {
             return k.match(new RegExp(depto+",colombia$"));
@@ -69,15 +92,23 @@ function getUbicacionesGeo(depto, cb) {
             return !!i[0];
         });
         
-        cb(null, {
-            "type": "Feature",
-            "geometry": {
-                "type": "MultiPoint",
-                "coordinates": locations
-            },
-            "properties": {
-                "name": "Municipios de Colombia"
+        var features =  Object.keys(data).map(function(u) {
+            var feature =  {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": data[u]
+                },
+                "properties": {
+                    "title": u
+                }   
             }
+            return feature;
+        });
+        
+        cb(null, {
+            "type": "FeatureCollection",
+            "features": features
         });
     });
 }

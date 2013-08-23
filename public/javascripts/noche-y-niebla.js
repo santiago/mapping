@@ -20,77 +20,38 @@ $(function() {
         var map = L.mapbox.map('map', 'examples.map-20v6611k');
         map.dragging.enable();
         map.setView([4.5980478, - 74.0760867], 6);
-
-        var ubicacionesJSON = {};
-        var ubicacionesCircles = {};
         
-        function renderUbicaciones(_depto) {
-            if(_depto) {
-                var data = ubicacionesJSON[_depto];
-                render(_depto, data);
-                return;
+        var ubicacionesMapView = new CircleMapperView(map, {
+            url: function(label) {
+                return '/nocheyniebla/ubicaciones/'+label+'.geojson'
             }
-
-            Object.keys(ubicacionesJSON).forEach(function(depto) {
-                if(ubicacionesJSON[depto]) { return; }
-                var data = ubicacionesJSON[depto];
-                render(depto, data);
-            });
-            
-            function render(depto, data) {
-                ubicacionesCircles[depto] = data.geometry.coordinates.map(function(c) {
-                    return L.circle(c.reverse(), 200).addTo(map)
-                });
-                // L.layerGroup(circles).addTo(map);
-            }
-        }
-
-        function getUbicaciones(depto) {
-            depto = depto.replace(/\s/g, '\\ ');
-            $.getJSON(encodeURI('/nocheyniebla/ubicaciones/'+depto+'.geojson'), function(data) {
-                if(!ubicacionesJSON[depto]) {
-                    ubicacionesJSON[depto] = data;
-                    renderUbicaciones(depto);
-                }
-            });
-        }
+        });
         
         function getDepto(depto) {
-            getUbicaciones(depto);
-            $("#"+depto+" .panel-depto").load(encodeURI('/nocheyniebla/ubicaciones/'+depto+'.html'), function() {
-                var current = ($(".panel-collapse.in").attr("id")||'').replace(/\s/g, '\\ ')
-                $(".panel-collapse.in").collapse("hide");
-                current && $("#"+current).find("ul.list-group").remove();
-                $("#"+depto).collapse("toggle");
-            });
+            ubicacionesMapView.showOnly(depto);
         }
         
         function onClickMapOn(e) {
             e.preventDefault();
             var depto = $(this).closest('li').find('.panel-title a').attr('href').replace('#', '');
-            $(this).addClass('btn-success');
-            $(this).removeClass('btn-default');
-            getUbicaciones(depto);
-            $(this).unbind('click');
-            $(this).click(onClickMapOff);
+            $(this).addClass('btn-success'); $(this).removeClass('btn-default');
+            $(this).unbind('click'); $(this).click(onClickMapOff);
+            
+            ubicacionesMapView.show(depto);
         }
         
         function onClickMapOff(e) {
             e.preventDefault();
             var depto = $(this).closest('li').find('.panel-title a').attr('href').replace('#', '');
-            
-            ubicacionesCircles[depto].forEach(function(circle) {
-                map.removeLayer(circle);
-            });
-            
-            delete ubicacionesJSON[depto];
             $(this).removeClass('btn-success');
             $(this).addClass('btn-default');
-            renderUbicaciones();          
             $(this).unbind('click');
             $(this).click(onClickMapOn);
+            
+            ubicacionesMapView.hide(depto);
         }
         
+        // Bind all 'Map' buttons to click
         $('button.btn-default.map').click(onClickMapOn);
         $('button.btn-success.map').click(onClickMapOff);
 
@@ -104,6 +65,115 @@ $(function() {
         }))();
 
         Backbone.history.start();
+        
+        // @Model CircleMapper
+        function CircleMapper(o) {
+            this.url = o.url;
+            this.layers = [];
+        }
+        
+        CircleMapper.prototype.get = function(label, cb) {
+            if(this.layers[label]) {
+               return cb(null, this.layers[label]);
+            }
+            $.getJSON(this.url(label), function(data) {
+                this.layers[label] = data;
+                cb(null, data);
+            }.bind(this));
+        };
+        
+        CircleMapper.prototype.getAll = function(cb) {
+            cb(this.layers);
+        };
+        
+        // @UI CircleMapperView
+        function CircleMapperView(map, o) {
+            this.active = [];
+            this.model = new CircleMapper({ url: o.url });
+            this.map = map;
+            this.circles = {};
+        }
+        
+        CircleMapperView.prototype.showOnly = function(label) {
+            this.hideAll();
+            this.setActive(label);
+        };
+        
+        CircleMapperView.prototype.hideAll = function() {
+            var _this = this;
+            this.model.getAll(function(err, data) {
+                for(var label in data) {
+                    _this.circles[label].forEach(function(circle) {
+                        _this.map.remove(circle);
+                    });
+                }
+            });
+        };
+        
+        CircleMapperView.prototype.add = function(label, cb) {
+            var _this = this;
+            this.model.get(label, function(err, data) {
+                _this.circles[label] = data.map(function(c) {
+                    L.circle(c.location, c.casos*250, { weight: 2 });
+                    return L.circle(c.location, c.casos*250, { weight: 2 }); // In meters
+                    // return L.circleMarker(c.location, { radius: c.casos/10 }).addTo(map); // In pixels
+                });
+                cb();
+                // L.layerGroup(circles).addTo(map);
+            });            
+        };
+        
+        CircleMapperView.prototype.addActive = function(labels) {
+            labels = typeof labels === 'string' ? [labels] : labels||[];
+            this.render(_.uniq(labels.concat(this.active)));
+        };
+        
+        CircleMapperView.prototype.show = CircleMapperView.prototype.addActive;
+        
+        CircleMapperView.prototype.hide = function(labels) {
+            labels = typeof labels === 'string' ? [labels] : labels||[];
+            this.render(_.without.apply(null, [this.active].concat(labels)));
+        };
+        
+        CircleMapperView.prototype.render = function(labels) {
+            if(!labels) { throw('Must specify what layer to render') }
+            labels = typeof labels === 'string' ? [labels] : labels||[];
+            var _this = this;
+
+            // These are the new layers that need to be rendered
+            var setActive = _.difference(labels, this.active);
+            console.log(labels);
+            console.log(setActive);
+            this.active = labels;
+
+            // Hide inactive. Remove layers that won't go for this render
+            Object.keys(_this.circles).filter(function(label) {
+                return labels.indexOf(label) == -1;
+            })
+            .forEach(function(label) {
+                _this.circles[label].forEach(function(circle) {
+                    _this.map.removeLayer(circle);
+                });
+            });
+            
+            // Make sure all circles needed are already loaded
+            loadCircles();
+            function loadCircles() {
+                var label = setActive.shift();
+                if(!label) { return; }
+                // Render when it's done loading
+                _this.add(label, function() {
+                    loadCircles();
+                    _render(label);
+                });
+            }
+
+            function _render(label) {            
+                _this.circles[label].forEach(function(circle) {
+                    circle.addTo(_this.map);
+                });
+            }
+        };
     }
 
 });

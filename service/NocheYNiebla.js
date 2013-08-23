@@ -42,6 +42,27 @@ module.exports = function NyNService(app) {
         });
     }
     
+    function getUbicacionesCasos(req, res, next) {
+        NyN.getUbicacionesCasos(function(err, data) {
+            req.casos = data;
+            
+            req.casosByDepto = {};
+            Object.keys(req.casos).forEach(function(u) {
+                var depto = null;
+                var casos = req.casos[u].split(',');
+                
+                try {
+                  depto = u.match(new RegExp(".+,(.+)$"))[1];
+                } catch(e) { return; }
+
+                req.casosByDepto[depto] = req.casosByDepto[depto] || 0;
+                req.casosByDepto[depto] += casos.length;
+            });
+            console.log(req.casosByDepto)
+            next();
+        });
+    }
+    
     function findUbicacion(req, res, next) {
         NyN.findUbicacion(req.body.ubicacion, function(err, data) {
             req.ubicacion = data;
@@ -74,10 +95,10 @@ module.exports = function NyNService(app) {
         });
     });
     
-    app.get('/nocheyniebla/ubicaciones', getUbicacionesOk, function(req, res) {
+    app.get('/nocheyniebla/ubicaciones', getUbicacionesOk, getUbicacionesCasos, function(req, res) {
         res.render('noche-y-niebla/ubicaciones-home', {
-            byDepto: req.byDepto['antioquia'],
-            deptos: Object.keys(req.byDepto).map(function(d) { return _(d).capitalize() }).sort()
+            deptos: Object.keys(req.byDepto).map(function(d) { return _(d).capitalize() }).sort(),
+            numCasos: req.casosByDepto
         });
     });
 
