@@ -47,7 +47,7 @@ block content
                     .panel-heading
                       h3.panel-title Ubicaciones
                     .panel-group#accordion
-                      each d in deptos
+                      each d in []
                         .panel.panel-default.panel-depto
                           .panel-heading
                             h4.panel-title
@@ -60,9 +60,25 @@ block content
               .row-fluid        
                 .span12
                   .panel
-                    .panel-heading
-                      h3.panel-title Ubicaciones
                     #map
+  .tpls.hidden
+      #ubicaciones-tpl
+      #tipificaciones-tpl
+        ul.list-group.list-group-flush
+          each t in tipificaciones
+            li.list-group-item      
+              .checkbox
+                label
+                  input(type="checkbox", value="#{t.value}", checked="checked")
+                  | #{t.label}
+      #responsables-tpl
+        ul.list-group.list-group-flush
+          each _resp in responsables
+            li.list-group-item
+              .checkbox
+                label
+                  input(type="checkbox", value="#{_resp.value}", checked="checked")
+                  | #{_resp.label}
 
 block javascripts
   script(type="text/javascript", src="/javascripts/noche-y-niebla.js")

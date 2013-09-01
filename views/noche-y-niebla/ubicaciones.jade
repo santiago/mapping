@@ -1,22 +1,38 @@
-ul.list-group.list-group-flush
-  each u in byDepto
-    li.list-group-item
-      .row-fluid
-        .span10
-          .input-group
-            input.form-control(type="text", value="#{u}")
-            input(type="hidden", name="orig", value="#{u}")
-            .input-group-btn
-              button.update-ubicacion.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown")
-                | . . . &nbsp;
-                span.caret 
-              ul.dropdown-menu.pull-right
-                li
-                  a(href="#") Map
-                li
-                  a(href="#") Edit
-                li
-                  a(href="#") Delete
-        .span2
-          p
-            button.btn.btn-success.btn-xs(type="button") Mapa
+.panel.panel-primary.panel-depto.in
+  .panel-heading
+    h3.panel-title #{depto}
+  .panel-body
+    ul.nav.nav-tabs
+      li
+        a(href="##{depto.toLowerCase()}/responsables") Responsables
+      li
+        a(href="##{depto.toLowerCase()}/tipificaciones") Tipo de Violencia
+      li
+        a(href="##{depto.toLowerCase()}") Ubicaciones
+      li
+        a(href="#settings", data-toggle="tab") Gráficas
+  ul.list-group.list-group-flush
+    each u in byDepto
+      li.list-group-item.ubicacion-item
+        .row-fluid
+          .span8
+            .input-group
+              input.form-control(type="text", value="#{u.split(',').reverse().splice(1)}")
+              input(type="hidden", name="orig", value="#{u}")
+              .input-group-btn
+                button.update-ubicacion.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown")
+                  | . . . &nbsp;
+                  span.caret 
+                ul.dropdown-menu.pull-right
+                  li
+                    a(href="#") Map
+                  li
+                    a(href="#") Edit
+                  li
+                    a(href="#") Delete
+          .span2
+            p
+              button.map.btn.btn-success.btn-xs(type="button") Mapa
+          .span2
+            p
+              span.badge.pull-right #{numCasos[u]}

@@ -4,14 +4,14 @@ _.mixin(_.str.exports());
 
 var NyN = require('../domain/NocheYNiebla');
 
-module.exports = function NyNService(app) {
-    
+module.exports = function NyNService(app) {    
     function findResponsableAndTipificacion(req, res, next) {
-        NyN.findResponsableAndTipificacion(req.query.responsables, req.query.tipificaciones, function(err, reportes) {
-            req.tipificacion_facet = reportes.facets.tipificaciones.terms;
-            req.responsable_facet = reportes.facets.responsables.terms;
-            delete reportes.facets;
-            req.reportes = reportes;
+        NyN.findResponsableAndTipificacion([req.params.depto], req.query.responsables, req.query.tipificaciones, function(err, casos) {
+            req.tipificacion_facet = casos.facets.tipificaciones.terms;
+            req.responsable_facet = casos.facets.responsables.terms;
+            delete casos.facets;
+            req.reportes = casos;
+            console.log(casos);
             next();
         });
     }
@@ -58,7 +58,6 @@ module.exports = function NyNService(app) {
                 req.casosByDepto[depto] = req.casosByDepto[depto] || 0;
                 req.casosByDepto[depto] += casos.length;
             });
-            console.log(req.casosByDepto)
             next();
         });
     }
@@ -78,7 +77,19 @@ module.exports = function NyNService(app) {
     
     function getUbicacionesGeo(req, res, next) {
         NyN.getUbicacionesGeo(req.params.depto, function(err, data) {
-            req.ubicaciones = data;
+            if(!req.ubicaciones) {
+                req.ubicaciones = data;
+            } else {
+                req.ubicaciones_geo = data;
+            }
+            req.casosByUbicacion = _.object(
+                data.map(function(i) {
+                    return i.title;
+                }), 
+                data.map(function(i) {
+                    return i.casos;
+                })
+            );
             next();
         });
     }
@@ -97,16 +108,22 @@ module.exports = function NyNService(app) {
     
     app.get('/nocheyniebla/ubicaciones', getUbicacionesOk, getUbicacionesCasos, function(req, res) {
         res.render('noche-y-niebla/ubicaciones-home', {
+            responsables: NyN.params.responsables,
+            tipificaciones: NyN.params.tipificaciones,
             deptos: Object.keys(req.byDepto).map(function(d) { return _(d).capitalize() }).sort(),
             numCasos: req.casosByDepto
         });
     });
 
-    app.get('/nocheyniebla/ubicaciones/:depto.html', getUbicacionesOk, function(req, res) {
+    app.get('/nocheyniebla/ubicaciones/:depto.html', getUbicacionesOk, getUbicacionesGeo, function(req, res) {
+        var byDepto = _.sortBy(req.byDepto[req.params.depto], function(u) {
+            return u.split(',').reverse().splice(1).toString();
+        });
+
         res.render('noche-y-niebla/ubicaciones', {
-            byDepto: req.ubicaciones.filter(function(u) {
-                return u.match(new RegExp(req.params.depto+"$"));
-            })
+            depto: _(req.params.depto).capitalize(),
+            byDepto: byDepto,
+            numCasos: req.casosByUbicacion
         });
     });
 

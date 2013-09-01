@@ -22,12 +22,24 @@ function updateUbicacion(orig, update, cb) {
             cb();
             return;
         }
-        redis.hset('nocheyniebla:ubicacion:casos:ok', update, data, function(err, data) {
-            if(!err) {
-                redis.hdel('nocheyniebla:ubicacion:casos', orig);
+        
+        redis.hget('nocheyniebla:ubicacion:casos:ok', update, function(err, current) {
+            if(!current) { 
+                cb();
+                return;
             }
-            cb(err);
+            current = current.split(',');
+            doUpdate(current.concat(data).join(','));
         });
+        
+        function doUpdate(casos) {
+            redis.hset('nocheyniebla:ubicacion:casos:ok', update, casos, function(err, data) {
+                if(!err) {
+                    redis.hdel('nocheyniebla:ubicacion:casos', orig);
+                }
+                cb(err);
+            });
+        }
     });
 }
 
@@ -64,15 +76,18 @@ function getUbicacionesGeo(depto, cb) {
     function _getUbicacionesGeo(err, casos) {
         redis.hgetall('nocheyniebla:ubicaciones:geo', function(err, data) {
             var locations = Object.keys(data).filter(function(k) {
-                return k.match(new RegExp(depto+",colombia$")) && data[k];
+                return k.match(new RegExp(","+depto+",colombia$")); // && data[k];
             });
 
             cb( null,
                 locations.map(function(u) {
+                    var location = data[u].split(',').map(function(l) { return (parseFloat(l||0))||null; });
+                    location = (_.compact(location).length||null) && location;
+                    var title = u.replace(/,colombia$/, '');
                     return {
-                        "title": u,
-                        "location": data[u].split(',').map(function(l) { return parseFloat(l||0); }),
-                        "casos": casos[u.replace(/,colombia$/, '')].split(',').length
+                        "title": title,
+                        "location": location,
+                        "casos": casos[title].split(',').length
                     }
                 })
             )
@@ -142,19 +157,24 @@ function getAllFacets(callback) {
 }
 
 // @api public
-function findResponsableAndTipificacion(responsables, tipificaciones, callback) {
+function findResponsableAndTipificacion(ubicaciones, responsables, tipificaciones, callback) {
     var q = {
         "query": {
             "bool" : {
                 "should": [
                     {
                         "terms": { 
-                            "_responsable": responsables
+                            "_responsable": responsables||[]
                         }
                     },
                     {
                         "terms": { 
-                            "_tipificacion": tipificaciones
+                            "_tipificacion": tipificaciones||[]
+                        }
+                    },
+                    {
+                        "terms": { 
+                            "_ubicacion": ubicaciones||[]
                         }
                     }
                 ]

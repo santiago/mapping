@@ -22,3 +22,8 @@ table.terms{margin-top:15px}
 .navbar .btn{margin-top:5px}
 .panel-group .panel-heading + .panel-collapse .panel-body.panel-depto{border-top:0;padding:0;}
 .panel-group .panel-heading + .panel-collapse .panel-body.panel-depto .list-group-item{border-right:0;border-left:0;border-top-right-radius:0;border-top-left-radius:0}
+.panel-depto .list-group-item.danger{background-color:#fcf2f2;border-color:#dfb5b4}
+.panel-depto.in{border:0;}
+.panel-depto.in .panel-body{padding:0}
+.panel-depto.in ul.nav.nav-tabs li a{color:#000;font-size:13px}
+.panel-depto.in ul.list-group{height:600px;overflow-y:auto}
