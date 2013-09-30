@@ -143,9 +143,11 @@ $(function() {
     
     // Ubicaciones
     function Ubicaciones() {
+        var currentDepto = null;
+
         var map = L.mapbox.map('map', 'examples.map-20v6611k');
         map.dragging.enable();
-        map.setView([4.5980478, - 74.0760867], 6);
+        map.setView([4.5980478, -74.0760867], 6);
         
         var ubicacionesMapView = new CircleMapperView(map, {
             url: function(label) {
@@ -154,6 +156,10 @@ $(function() {
         });
         
         function getDepto(depto, cb) {
+            if(currentDepto != depto) {
+                currentDepto = depto;
+            }
+
             ubicacionesMapView.showOnly(depto);
             
             function _onClickMapOn() {
@@ -225,22 +231,39 @@ $(function() {
         }
         
         function getTipificaciones(depto) {
-            getDepto(depto, function() {
+            if(currentDepto != depto) {
+                currentDepto = depto;
+                getDepto(depto, function() {
+                    _show();
+                });
+            } else {
+                _show();
+            }
+
+            function _show() {
                 var $tpl = $('#tipificaciones-tpl ul.list-group').clone();
                 $tpl.removeAttr('id');
                 $('#ubicaciones-tpl').append($('.panel-depto.in ul.list-group'));
                 $('.panel-depto.in').append($tpl);
-            });
+            }
         }
 
         function getResponsables(depto) {
-            getDepto(depto, function() {
+            if(currentDepto != depto) {
+                currentDepto = depto;
+                getDepto(depto, function() {
+                    _show();
+                });
+            } else {
+                _show();
+            }
+
+            function _show() {
                 var $tpl = $('#responsables-tpl ul.list-group').clone();
                 $tpl.removeAttr('id');
                 $('#ubicaciones-tpl').append($('.panel-depto.in ul.list-group'));
                 $('.panel-depto.in').append($tpl);
-            });
-            
+            }
         }
 
         // Backbone Router for this component

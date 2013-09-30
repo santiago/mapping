@@ -19,16 +19,18 @@ module.exports = {
 function updateUbicacion(orig, update, cb) {
     findUbicacion(orig, function(err, data) {
         if(err || !data || !data.length) {
+            console.log('ehhhhh');
             cb();
             return;
         }
         
         redis.hget('nocheyniebla:ubicacion:casos:ok', update, function(err, current) {
-            if(!current) { 
-                cb();
-                return;
+            if(current) { 
+                current = current.split(',');
+            } else {
+                current = [];
             }
-            current = current.split(',');
+            
             doUpdate(current.concat(data).join(','));
         });
         
