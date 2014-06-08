@@ -62,7 +62,9 @@ module.exports = api = {
                     });
                     cb(null, _tags);
                 });
+                return;
             }
+            cb(null, []);
         }
     },
     

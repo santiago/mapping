@@ -114,8 +114,8 @@ $(function() {
                 return (params ? '?'+params : '');
             }
         }[typeof (params||'')]();
-        
 
+        console.log('/twitter/stream/'+section+query);
         $.get('/twitter/stream/'+section+query, function(data) {
             $('.tab-content #'+section).html(data);
             prepareTags();

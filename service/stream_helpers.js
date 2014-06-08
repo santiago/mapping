@@ -5,7 +5,7 @@ module.exports = function(app) {
     var Twitter = app.Twitter;
 
     var Terms = require('../domain/Terms');
-    var Analysis = new (require('../domain/Analysis'))('stream2', 'message');
+    var Analysis = new (require('../domain/Analysis'))('stream', 'message');
 
     return {
         follow: follow,
@@ -124,6 +124,7 @@ module.exports = function(app) {
     function analysis(req, res, next) {
         var mode = req.params.mode||'shingles';
         var q = req.query.q || null;
+
         Analysis[mode](q, function(err, result) {
             req.terms = result;
             next();
