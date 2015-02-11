@@ -87,6 +87,14 @@ $(function() {
         });
     };
     
+    CircleMapperView.prototype.heatmap = function(labels) {
+        var _this = this;
+        labels.forEach(function(label) {
+            var circles = _this.circles[label];
+            console.log(circles);
+        });
+    };
+        
     CircleMapperView.prototype.render = function(labels) {
         if(!labels) { throw('Must specify what layer to render') }
         labels = typeof labels === 'string' ? [labels] : labels||[];
@@ -108,6 +116,7 @@ $(function() {
 
         // Make sure all circles needed are already loaded
         loadCircles();
+        this.heatmap(labels);
         function loadCircles() {
             var label = setActive.shift();
             if(!label) { return; }
@@ -145,7 +154,7 @@ $(function() {
     function Ubicaciones() {
         var currentDepto = null;
 
-        var map = L.mapbox.map('map', 'examples.map-20v6611k');
+        var map = L.mapbox.map('map', 'examples.map-i86nkdio');
         map.dragging.enable();
         map.setView([4.5980478, -74.0760867], 6);
         
