@@ -66,15 +66,16 @@ $(function() {
     setTimeout(getData, 2000);
 
     function getData() {
-        $.getJSON('/nocheyniebla/ubicaciones/antioquia.geojson', function(data) {
+        /*$.getJSON('/nocheyniebla/ubicaciones/antioquia.geojson', function(data) {
             var circles = data.geometry.coordinates.map(function(c) {
                 return L.circle(c.reverse(), 200).addTo(map)
             });
 
             // L.layerGroup(circles).addTo(map);
-        });
+        });*/
 
-        $.getJSON('/municipios.json', function(data) {
+        $.getJSON('/colombia.json', function(data) {
+	    console.log(data)
             geojson = L.geoJson(data, {
                 style: style,
                 onEachFeature: onEachFeature
@@ -120,6 +121,7 @@ $(function() {
 
     // get color depending on population density value
     function getColor(d) {
+	console.log(d);
         return  d > 0.50 ? '#800026' : 
                 d > 0.30 ? '#BD0026' : 
                 d > 0.10 ? '#E31A1C' : 
@@ -136,7 +138,8 @@ $(function() {
             color: 'white',
             dashArray: '3',
             fillOpacity: 0.6,
-            fillColor: getColor(feature.properties.Shape_Area)
+            //fillColor: getColor(feature.properties.Shape_Area)
+            fillColor: getColor(0.25)
         };
     }
 
